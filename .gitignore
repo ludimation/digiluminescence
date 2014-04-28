@@ -1,3 +1,7 @@
+# Builds directory
+/CINDER/xcode/build/digiluminescence*
+/CINDER/xcode/build/Debug/digiluminescence
+
 # Compiled Object files
 *.slo
 *.lo
