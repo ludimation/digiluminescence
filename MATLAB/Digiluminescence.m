@@ -1,4 +1,4 @@
-function [error] = Digiluminescence()
+function [cleanPlate, digiluminescence_all] = digiluminescence(C_all, D_all, joint_positions_all, timestamps)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -19,6 +19,11 @@ for i = 1 % For loop is for code collapsing only (so I don't have to look at the
 end
 
 %% Initialize return values
+cleanPlate = zeros(size(D_all(:,:,1)), 'int16');
+digiluminescence_all = zeros(size(C_all),'int8');
+
+% cleanPlateSize = size(cleanPlate)
+% j_max = size(D_all, 3)
 
 %% Create a clean plate for the depth data
 
