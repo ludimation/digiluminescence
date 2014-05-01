@@ -18,6 +18,30 @@ for i = 1 % For loop is for code collapsing only (so I don't have to look at the
     
 end
 
+%% Initialize return values
+
+%% Create a clean plate for the depth data
+
+%% Create digiluminescence effect frame by frame
+
+% Calculate projective joint positions of this frame
+
+% Skip the following on the first frame
+
+% Calculate vector field for current frame based on join positions of this
+% frame and the previous frame
+
+% Calculate movement mask based on clean slate difference matting with
+% current frame
+
+% Mask vector field with movement mask
+
+% Fade effect from previous frame
+
+% Draw colored lines along vectors of the field
+
+
+
 %% Load images
 % % TODO: Generalize this into a GUI that allows you to select images
 % T0 = double(imread(tFileName)); % Target image that makes up largest area of composited image
