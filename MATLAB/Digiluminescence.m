@@ -26,6 +26,11 @@ digiluminescence_all = zeros(size(C_all),'int8');
 % j_max = size(D_all, 3)
 
 %% Create a clean plate for the depth data
+for j = 1:size(D_all, 3)
+    cleanPlate = max(cleanPlate, D_all(:,:,j));
+end
+
+imshow(cleanPlate);
 
 %% Create digiluminescence effect frame by frame
 
