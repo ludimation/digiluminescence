@@ -6,7 +6,6 @@ function [cleanPlate, digiluminescence_all] = digiluminescence(C_all, D_all, joi
 tic
 fprintf('====\n');
 fprintf('Digiluminescence :: Executing\n');
-fprintf('====\n');
 
 %% Handle default arguments
 for i = 1 % For loop is for code collapsing only (so I don't have to look at these)
@@ -15,8 +14,13 @@ for i = 1 % For loop is for code collapsing only (so I don't have to look at the
     if( nargin < 1 )
         ;
     end
-    
+   
 end
+
+fprintf('====\n');
+fprintf('handled default arguments \n');
+toc
+
 
 %% Initialize return values
 cleanPlate = zeros(size(D_all(:,:,1)), 'int16');
@@ -25,14 +29,26 @@ digiluminescence_all = zeros(size(C_all),'int8');
 % cleanPlateSize = size(cleanPlate)
 % j_max = size(D_all, 3)
 
+fprintf('----\n');
+fprintf('initialized return values \n');
+toc
+
 %% Create a clean plate for the depth data
-for j = 1:size(D_all, 3)
+for j = 1:size(D_all, 3) % TODO: ask Il if there's a way to do this without a for loop
     cleanPlate = max(cleanPlate, D_all(:,:,j));
 end
 
 imshow(cleanPlate);
+% TODO: save this out
 
-%% Create digiluminescence effect frame by frame
+fprintf('----\n');
+fprintf('created clean plate for depth data \n');
+toc
+
+%% Create digiluminescence effect frame by frame 
+% TODO: ask Il if there's a way to do this without a for loop (i.e.:
+% calculating large matrixes for all frames and doing comparisons at once
+% for entire piece
 
 % Calculate projective joint positions of this frame
 
@@ -49,6 +65,16 @@ imshow(cleanPlate);
 % Fade effect from previous frame
 
 % Draw colored lines along vectors of the field
+
+fprintf('----\n');
+fprintf('create digiluminescence effect frame by frame \n');
+toc
+
+% Report timestamp
+fprintf('====\n');
+fprintf('Digiluminescence :: End\n');
+toc
+fprintf('====\n');
 
 
 
@@ -253,11 +279,6 @@ imshow(cleanPlate);
 % % Save final image
 % imwrite(uint8( I0        ),[ iFileName '.png'        ]);
 % 
-% % Report timestamp
-% fprintf('====\n');
-% fprintf('Digiluminescence :: End\n');
-% toc
-% fprintf('====\n');
 % 
 % %% Cleanup Variables (some of these could be cleared earlier to save memory)
 % clear iFileName nonC iterations dimReturnsThreshold verbose
