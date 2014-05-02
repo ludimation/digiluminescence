@@ -73,6 +73,7 @@ void testApp::setup() {
     openNIRecorder.start();
 
     openNIPlayer.setup();
+    openNIPlayer.addUserGenerator();
 	openNIPlayer.start();
     
     verdana.loadFont(ofToDataPath("verdana.ttf"), 24);
@@ -120,16 +121,18 @@ void testApp::exit(){
 void testApp::keyPressed(int key){
 
     int cloudRes = -1;
+    string fileName = "test_20140501_1904.oni";
     switch (key) {
         case ' ':
             if(!openNIRecorder.isRecording()){
-                openNIRecorder.startRecording(ofToDataPath("test.oni"));
+//                openNIRecorder.startRecording(ofToDataPath("test"+ std::to_string(ofGetSystemTimeMicros()/1000)+".oni"));
+                openNIRecorder.startRecording(ofToDataPath(fileName));
             }else{
                 openNIRecorder.stopRecording();
             }
             break;
         case 'p':
-            openNIPlayer.startPlayer("test.oni");
+            openNIPlayer.startPlayer(fileName);
             break;
         case '/':
             openNIPlayer.setPaused(!openNIPlayer.isPaused());
