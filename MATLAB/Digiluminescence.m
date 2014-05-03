@@ -81,6 +81,26 @@ clear D_all_cPlate D_all_clean D_all_diff
 toc
 
 %% Calculate projective joint positions for all frames
+tic
+fprintf('----\n');
+fprintf('Calculating projective joint positions for all frames \n');
+
+% Re-shape joint_positions_all so it can be fed into projectiveTransformation (p, to)
+j_pos_all_reshaped = reshape(permute(joint_positions_all, [2 1 3]), 3, n_frames*n_joints);
+j_pos_all_x = j_pos_all_reshaped(1,:);
+j_pos_all_y = j_pos_all_reshaped(2,:);
+j_pos_all_z = j_pos_all_reshaped(3,:);
+% feed individual x, y, and z lists into projectiveTransformation (x, y, z, to)
+[ j_pos_all_x_prjctd, j_pos_all_y_prjctd, j_pos_all_z_prjctd ] = ...
+    projectiveTransformation(j_pos_all_x, j_pos_all_y, j_pos_all_z, 'projective');
+j_pos_all_reshaped_projective = [ j_pos_all_x_prjctd; j_pos_all_y_prjctd; j_pos_all_z_prjctd ];
+j_pos_all_projective = permute(reshape(j_pos_all_reshaped_projective, 3,n_joints,n_frames), [2 1 3]);
+
+% cleanup
+clear j_pos_all_reshaped j_pos_all_reshaped_projective
+clear j_pos_all_x j_pos_all_y j_pos_all_z
+clear j_pos_all_x_prjctd j_pos_all_y_prjctd j_pos_all_z_prjctd 
+
 % print time
 toc
 
