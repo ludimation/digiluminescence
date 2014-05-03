@@ -3,11 +3,13 @@ function [ out_dl_all, out_D_cPlate, out_uMasks_all, out_denseCorr_all ] = digil
 %   Detailed explanation goes here
 
 % Start timer
-tic
 fprintf('====\n');
 fprintf('Digiluminescence :: Executing\n');
 
 %% Handle default arguments
+tic
+fprintf('====\n');
+fprintf('Handling default arguments \n');
 for i = 1 % For loop is for code collapsing only (so I don't have to look at these)
 
     % set default value for first argument
@@ -17,11 +19,13 @@ for i = 1 % For loop is for code collapsing only (so I don't have to look at the
    
 end
 
-fprintf('====\n');
-fprintf('handled default arguments \n');
+% print time
 toc
 
 %% Initialize variables
+tic
+fprintf('----\n');
+fprintf('Initializing variables \n');
 
 out_D_cPlate                = zeros(size(D_all(:,:,1))  , 'int16'   );
 out_uMasks_all              = zeros(size(D_all)         , 'int16'   );
@@ -31,11 +35,13 @@ out_dl_all                  = zeros(size(C_all)         , 'int8'    );
 n_joints            = size(joint_positions_all  , 1         );
 n_frames            = length(timestamps                     );
 
-fprintf('----\n');
-fprintf('initialized return values \n');
+% print time
 toc
 
 %% Create a clean plate for the depth data
+tic
+fprintf('----\n');
+fprintf('Creating clean plate for depth data \n');
 
 % TODO: save this out
 % out_D_cPlate is an image that represents the background of the scene,
@@ -46,14 +52,20 @@ toc
 %     out_D_cPlate = max(out_D_cPlate, D_all(:,:,j));
 % end
 out_D_cPlate = max(D_all,[],3); % does same as above, without a for loop
+
+% print time
+toc
+
 fprintf('----\n');
-fprintf('created clean plate for depth data \n');
+% print time
 toc
 
 %% Create digiluminescence effect frame by frame 
 % TODO: ask Il if there's a way to do this without a for loop (i.e.:
 % calculating large matrixes for all frames and doing comparisons at once
 % for entire piece
+% print time
+toc
 
 % Calculate projective joint positions of this frame
 
@@ -72,13 +84,14 @@ toc
 % Draw colored lines along vectors of the field
 
 fprintf('----\n');
-fprintf('create digiluminescence effect frame by frame \n');
+% print time
 toc
 
-% Report timestamp
+
+%% Report timestamp
 fprintf('====\n');
-fprintf('Digiluminescence :: End\n');
-toc
+fprintf('Digiluminescence :: End\n'); 
+%TODO: figure out a way to print all elapsed time for this function
 fprintf('====\n');
 
 
