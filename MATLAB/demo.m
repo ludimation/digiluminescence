@@ -19,7 +19,7 @@ fprintf('====\n');
 
 %% Run digiluminescence
 n_framesToProcess = 30:32; % smaller test amount
-n_framesToProcess = 1:300;
+% n_framesToProcess = 1:300;
 % n_framesToProcess = 1:length(data_timestamps); % Uncomment this line for full data processing, comment it out for smaller set above
 [ output_digiluminescence_all, output_cleanPlate, output_uMasks_all, output_j_features, output_denseCorr_all, output_grid_all ] = ...
     digiluminescence(...
@@ -27,7 +27,7 @@ n_framesToProcess = 1:300;
         data_D_all(:,:, n_framesToProcess), ...
         data_joint_positions_all(:,:, n_framesToProcess), ...
         data_timestamps(n_framesToProcess)...
-        ... true... comment this line out with '...' preceding 'true...' to skip calculate dense correspondence
+        , true(1) ... comment this line out with '...' preceding ', true...' to skip calculate dense correspondence
     );
 
 %% Test display
