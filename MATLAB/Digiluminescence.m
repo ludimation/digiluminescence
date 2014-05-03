@@ -175,6 +175,8 @@ fprintf('----\n');
 fprintf('Saving out some test files \n');
 
 % writerObj = VideoWriter(['test_01_Color.mp4'], 'MPEG-4');
+% open(writerObj);
+% 
 imwrite( C_all(:,:,:,1)                     ,[ 'test_01_Color.png'          ]);
 imwrite(uint8( D_all(:,:,1) / 256 )         ,[ 'test_02_Depth.png'          ]);
 imwrite(uint8( out_D_cPlate / 256 )         ,[ 'test_03_Depth_cPlate.png'   ]);
