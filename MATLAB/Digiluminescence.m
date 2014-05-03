@@ -80,24 +80,17 @@ clear D_all_cPlate D_all_clean D_all_diff
 % print time
 toc
 
-%% Create digiluminescence effect frame by frame 
-% TODO: ask Il if there's a way to do this without a for loop (i.e.:
-% calculating large matrixes for all frames and doing comparisons at once
-% for entire piece
+%% Calculate projective joint positions for all frames
 % print time
 toc
 
-% Calculate projective joint positions of this frame
 
-% Skip the following on the first frame
+%% Calculate dense correspondence fields frame by frame
 
-% Calculate vector field for current frame based on join positions of this
-% frame and the previous frame
 
-% Calculate movement mask based on clean slate difference matting with
-% current frame
+%% Create digiluminescence effect from dense correspondence fields
 
-% Mask vector field with movement mask
+% Mask dense correspondence field with movement mask
 
 % Fade effect from previous frame
 
