@@ -117,19 +117,19 @@ j_pos_all_projective = permute(reshape(j_pos_all_reshaped_projective, 3,n_joints
 % Create second array for easy grabbing of one set of joints from the
 % previous frame (frame 1 is compared against frame n which doesn't quite
 % make sense, but I'd just like to see what happens)
-j_pos_all_projective2 = circshift(j_pos_all_projective, [0,0,-1]);
+j_pos_all_projective_start = circshift(j_pos_all_projective, [0,0,1]);
 
 % Create list of feature correspondences in a shape that thin plate dense
 % corespondence function requires
 %    TODO:
 %    - create a 3D thin plate function and update this to include z
-j_startingFeatures  = permute(j_pos_all_projective(     :, 1:2, :)  , [2,1,3]);
-j_endingFeatures    = permute(j_pos_all_projective2(    :, 1:2, :)  , [2,1,3]);
+j_startingFeatures  = permute(j_pos_all_projective_start(   :, 1:2, :)  , [2,1,3]);
+j_endingFeatures    = permute(j_pos_all_projective(         :, 1:2, :)  , [2,1,3]);
 % switch x, y positions
 j_startingFeatures  = circshift(j_startingFeatures  , 1);
 j_endingFeatures    = circshift(j_endingFeatures    , 1);
 % flip x values and translate them the width of the screen
-out_j_features = [j_endingFeatures; j_startingFeatures];
+out_j_features = [ j_endingFeatures; j_startingFeatures];
 
 % TODO: 
 %    - add additional feature points along the lines of larger key limbs \
