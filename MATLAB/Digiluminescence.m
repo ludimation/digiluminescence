@@ -1,4 +1,4 @@
-function [ out_dl_all, out_D_cPlate, out_uMasks_all, out_denseCorr_all ] = digiluminescence(C_all, D_all, joint_positions_all, timestamps)
+function [ out_dl_all, out_D_cPlate, out_uMasks_all, out_j_features, out_denseCorr_all ] = digiluminescence(C_all, D_all, joint_positions_all, timestamps)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -84,7 +84,10 @@ tic
 fprintf('----\n');
 fprintf('Calculating projective joint positions for all frames \n');
 
-% Re-shape joint_positions_all so it can be fed into projectiveTransformation (p, to)
+% Re-shape joint_positions_all and split it up so it can be fed into
+% projectiveTransformation (x, y, z, to)
+%      TODO: would be nice if the projectiveTransformation function only
+%      took two args (p, to) and did this reshaping on its own
 j_pos_all_reshaped = reshape(permute(joint_positions_all, [2 1 3]), 3, n_frames*n_joints);
 j_pos_all_x = j_pos_all_reshaped(1,:);
 j_pos_all_y = j_pos_all_reshaped(2,:);
@@ -92,6 +95,7 @@ j_pos_all_z = j_pos_all_reshaped(3,:);
 % feed individual x, y, and z lists into projectiveTransformation (x, y, z, to)
 [ j_pos_all_x_prjctd, j_pos_all_y_prjctd, j_pos_all_z_prjctd ] = ...
     projectiveTransformation(j_pos_all_x, j_pos_all_y, j_pos_all_z, 'projective');
+% build j_pos_all_projective from reshaped return vaules
 j_pos_all_reshaped_projective = [ j_pos_all_x_prjctd; j_pos_all_y_prjctd; j_pos_all_z_prjctd ];
 j_pos_all_projective = permute(reshape(j_pos_all_reshaped_projective, 3,n_joints,n_frames), [2 1 3]);
 
@@ -103,21 +107,26 @@ clear j_pos_all_x_prjctd j_pos_all_y_prjctd j_pos_all_z_prjctd
 % print time
 toc
 
-
 %% Calculate dense correspondence fields frame by frame
 tic
 fprintf('----\n');
 fprintf('Calculating densedense correspondence fields frame by frame \n');
 
-% create second array for easy grabbing of one set of joints and the
-% previous frame (frame 1 is compared against frame n just to see what
-% happens)
+% Create second array for easy grabbing of one set of joints from the
+% previous frame (frame 1 is compared against frame n which doesn't quite
+% make sense, but I'd just like to see what happens)
 j_pos_all_projective2 = circshift(j_pos_all_projective, 1);
 
-% create dense correspondence fields
-for iterator = 1:size(j_pos_all_projective, 3)
-    j_pos_all_projective(:,1:2,iterator)';
-    j_pos_all_projective2(:,1:2,iterator)';
+% Create list of feature correspondences in a shape that thin plate dense
+% corespondence function can understand
+%    TODO: make this and the thin plate function 3D instead
+out_j_features = [j_pos_all_projective(:, 1:2, :), j_pos_all_projective2(:, 1:2, :)];
+out_j_features = permute(out_j_features, [2,1,3]);
+
+% create dense correspondence fields one frame at a time
+for iterator = 1:size(out_j_features, 3)
+%     out_denseCorr_all(:,:, iterator) = ...
+%         thin_plate_denseCorrespondence(out_j_features(:, :, iterator))
 end
 
 % print time
