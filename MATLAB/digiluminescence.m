@@ -113,8 +113,20 @@ j_pos_all_z = j_pos_all_reshaped(3,:);
 % build j_pos_all_projective from reshaped return vaules
 j_pos_all_reshaped_projective = [ j_pos_all_x_prjctd; j_pos_all_y_prjctd; j_pos_all_z_prjctd ];
 j_pos_all_projective = permute(reshape(j_pos_all_reshaped_projective, 3,n_joints,n_frames), [2 1 3]);
-j_startingFeatures = permute(j_pos_all_projective(:, 1:2, :), [2,1,3]);
-j_endingFeatures = permute(circshift(j_pos_all_projective(:, 1:2, :), -1), [2,1,3]);
+
+% Create second array for easy grabbing of one set of joints from the
+% previous frame (frame 1 is compared against frame n which doesn't quite
+% make sense, but I'd just like to see what happens)
+j_pos_all_projective2 = circshift(j_pos_all_projective, -1);
+
+% Create list of feature correspondences in a shape that thin plate dense
+% corespondence function requires
+%    TODO:
+%    - create a 3D thin plate function and update this to include z
+j_startingFeatures  = permute(j_pos_all_projective(     :, 1:2, :)  , [2,1,3]);
+j_endingFeatures    = permute(j_pos_all_projective2(    :, 1:2, :)  , [2,1,3]);
+out_j_features = [j_startingFeatures; j_endingFeatures];
+
 
 % TODO: 
 %    - add additional feature points along the lines of larger key limbs \
@@ -126,7 +138,8 @@ j_endingFeatures = permute(circshift(j_pos_all_projective(:, 1:2, :), -1), [2,1,
 %TODO: draw starting features large and limbs in white
 % drawCircles(points, I, radius, color)
 % drawPoints(points, I, size, color)
-drawPoints(j_startingFeatures, out_grid_all, 8, white(1)*2^8 );
+% j_startingFeatures_size = size(j_startingFeatures)
+out_grid_all = drawPoints(j_startingFeatures, out_grid_all, 8, white(1)*2^8 );
 % drawLimbs(j_pos_all_projective, out_grid_all, 4, white(1)*2^8 )
 
 % cleanup
@@ -141,18 +154,6 @@ toc
 % tic
 fprintf('----\n');
 fprintf('Calculating dense correspondence fields frame by frame \n');
-
-% Create second array for easy grabbing of one set of joints from the
-% previous frame (frame 1 is compared against frame n which doesn't quite
-% make sense, but I'd just like to see what happens)
-j_pos_all_projective2 = circshift(j_pos_all_projective, -1);
-
-% Create list of feature correspondences in a shape that thin plate dense
-% corespondence function needs
-%    TODO:
-%    - create a 3D thin plate function and update this to include z
-out_j_features = [j_pos_all_projective(:, 1:2, :), j_pos_all_projective2(:, 1:2, :)];
-out_j_features = permute(out_j_features, [2,1,3]);
 
 % create dense correspondence fields one frame at a time
 if calcDenseCorr
@@ -170,9 +171,9 @@ end
 % draw grid again sparser and blue to show where it started : drawGrid (I, spcGrid, spcPoints, color)
 out_grid_all = drawGrid(out_grid_all, 10, 2, [0,2^8, 2^8]);
 % TODO: draw starting joints in blue (small radius)
-drawPoints(j_startingFeatures, out_grid_all, 4, [0,0,2^8] );
+out_grid_all = drawPoints(j_startingFeatures, out_grid_all, 4, [0,0,2^8] );
 % TODO: draw ending joints in magenta (small radius -- warped joints will appear in large white dots)
-drawPoints(j_endingFeatures, out_grid_all, 4, [2^8,0,2^8] );
+out_grid_all = drawPoints(j_endingFeatures, out_grid_all, 4, [2^8,0,2^8] );
 
 % cleanup
 clear j_pos_all_projective j_pos_all_projective2
@@ -321,46 +322,55 @@ function [ I ] = drawGrid (I, spcGrid, spcP, color)
 end
 
 %% DRAWPOINTS method
-function [ I ] = drawPoints(points, I, size, color)
+function [ I ] = drawPoints(p_array, I, p_size, c_rgb)
 % draws squares around point of the specified size and color into the image
 % provided
+
+    % check inputs
     narginMin = 2;
     narginMax = 4;
     narginchk(narginMin, narginMax);
-
     if nargin < 3
-        size = 8;
+        p_size = 8;
     end
     if nargin < 4
-        color = white(1) * 2^8;
+        c_rgb = white(1) * 2^8;
     end
     
-    % indeces must be integers %TODO: might also want to check values to
-    % make sure none of them are 0, nor max width and height of I
-    points = int8(points);
-    
+    % indeces must be rounded doubles / integers %TODO: might also want to
+    % check values to make sure none of them are 0, nor max width and
+    % height of I
+%     p_array
+    p_array = round(p_array);
+    p_size = size(p_array);
+    p_n = prod(p_size);
+    p_h = p_size(1);
+    p_w = p_size(2);
+    p_frames = p_size(3);
     % TODO: add points to points array to account for point size 
     
-    % build arrays of x coords, y coords, channel numbers, and frame numbers
-    xArray = points(1,:,:);
-    yArray = points(2,:,:);
-%     size_points = size(points,1)
-%     size_search = size(xArray,1)
-%     rArray = ones(search_size)     ;
-%     gArray = ones(search_size) *2  ;%repmat(2, size(xArray));
-%     bArray = ones(search_size) *3  ;%repmat(3, size(xArray));
-%     frameArray = reshape(repmat(1:size(xArray,3), [size(xArray,2),1,1]), size(xArray));
-%     
-%     % create one array for each channel that contains the indexes of the
-%     % pixels to be colored
-%     point_indexes_r = sub2ind(size(I), xArray, yArray, rArray, frameArray);
-%     point_indexes_g = sub2ind(size(I), xArray, yArray, gArray, frameArray);
-%     point_indexes_b = sub2ind(size(I), xArray, yArray, bArray, frameArray);
-%     
-%     % color the pixels
-%     I(point_indexes_r) = color(1);
-%     I(point_indexes_g) = color(2);
-%     I(point_indexes_b) = color(3);
+    % build arrays of x coords, y coords, channel numbers, and frame
+    % numbers starting with x so we can save out some properties that
+    % should remain constant throughout
+    x_array = reshape(p_array(1,:,:), [p_n/p_h,1,1]);
+    sz_x_array = size(x_array);
+    % remaining arrays
+    y_array = reshape(p_array(2,:,:), sz_x_array)       ;
+    r_array = ones(sz_x_array, 'double')                ;
+    g_array = ones(sz_x_array, 'double')     *2         ; 
+    b_array = ones(sz_x_array, 'double')     *3         ; 
+    frame_array = double(reshape(repmat(1:p_frames, [p_w,1,1]), sz_x_array));
+
+    % create one array for each channel that contains the indexes of the
+    % pixels to be colored
+    point_indexes_r = sub2ind(size(I), x_array, y_array, r_array, frame_array);
+    point_indexes_g = sub2ind(size(I), x_array, y_array, g_array, frame_array);
+    point_indexes_b = sub2ind(size(I), x_array, y_array, b_array, frame_array);
+    
+    % color the pixels
+    I(point_indexes_r) = c_rgb(1);
+    I(point_indexes_g) = c_rgb(2);
+    I(point_indexes_b) = c_rgb(3);
 
 end
 
