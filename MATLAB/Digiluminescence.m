@@ -46,11 +46,7 @@ fprintf('Creating clean plate for depth data \n');
 % out_D_cPlate is an image that represents the background of the scene,
 % which is essentially the maximum depth values found in all frames of the
 % depth data
-
-% for j = 1:size(D_all, 3) 
-%     out_D_cPlate = max(out_D_cPlate, D_all(:,:,j));
-% end
-out_D_cPlate = max(D_all,[],3); % does same as above, without a for loop
+out_D_cPlate = max(D_all,[],3);
 
 % print time
 toc
