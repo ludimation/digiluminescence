@@ -1,4 +1,4 @@
-function [cleanPlate, digiluminescence_all] = digiluminescence(C_all, D_all, joint_positions_all, timestamps)
+function [ out_dl_all, out_D_cPlate, out_uMasks_all, out_denseCorr_all ] = digiluminescence(C_all, D_all, joint_positions_all, timestamps)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -21,26 +21,31 @@ fprintf('====\n');
 fprintf('handled default arguments \n');
 toc
 
+%% Initialize variables
 
-%% Initialize return values
-cleanPlate = zeros(size(D_all(:,:,1)), 'int16');
-digiluminescence_all = zeros(size(C_all),'int8');
+out_D_cPlate                = zeros(size(D_all(:,:,1))  , 'int16'   );
+out_uMasks_all              = zeros(size(D_all)         , 'int16'   );
+out_denseCorr_all           = zeros(size(C_all)         , 'int8'    );
+out_dl_all                  = zeros(size(C_all)         , 'int8'    );
 
-% cleanPlateSize = size(cleanPlate)
-% j_max = size(D_all, 3)
+n_joints            = size(joint_positions_all  , 1         );
+n_frames            = length(timestamps                     );
 
 fprintf('----\n');
 fprintf('initialized return values \n');
 toc
 
 %% Create a clean plate for the depth data
-for j = 1:size(D_all, 3) % TODO: ask Il if there's a way to do this without a for loop
-    cleanPlate = max(cleanPlate, D_all(:,:,j));
-end
 
-imshow(cleanPlate);
 % TODO: save this out
+% out_D_cPlate is an image that represents the background of the scene,
+% which is essentially the maximum depth values found in all frames of the
+% depth data
 
+% for j = 1:size(D_all, 3) 
+%     out_D_cPlate = max(out_D_cPlate, D_all(:,:,j));
+% end
+out_D_cPlate = max(D_all,[],3); % does same as above, without a for loop
 fprintf('----\n');
 fprintf('created clean plate for depth data \n');
 toc
