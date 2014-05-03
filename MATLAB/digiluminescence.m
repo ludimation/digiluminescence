@@ -2,6 +2,11 @@ function [ out_dl_all, out_D_cPlate, out_uMasks_all, out_j_features, out_denseCo
     digiluminescence(C_all, D_all, joint_positions_all, timestamps, calcDenseCorr)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
+% TODO: 
+%     - Generalize this into a GUI that allows user to select data? 
+%     - Check formatting of all inputs to make sure this executes properly
+%     - Check number of inputs / outputs [nargoutchk/narginchk(minargs,
+%     maxargs)]
 
 % Start timer
 fprintf('====\n');
@@ -28,22 +33,14 @@ tic
 fprintf('----\n');
 fprintf('Initializing variables \n');
 
-out_D_cPlate                = zeros(size(D_all(:,:,1))  , 'int16'   );
-out_uMasks_all              = zeros(size(D_all)         , 'int16'   );
-out_denseCorr_all           = zeros(size(C_all)         , 'int8'    );
-out_grid_all                = zeros(size(C_all)         , 'int8'    );
-out_dl_all                  = zeros(size(C_all)         , 'int8'    );
+out_D_cPlate       	= zeros(    size(D_all(:,:,1))          , 'int16'   );
+out_uMasks_all      = zeros(    size(D_all)                 , 'int16'   );
+out_denseCorr_all   = zeros(    size(C_all)                 , 'int8'    );
+out_grid_all        = zeros(    size(C_all)                 , 'int8'    );
+out_dl_all          = zeros(    size(C_all)                 , 'int8'    );
 
-n_joints            = size(joint_positions_all  , 1         );
-n_frames            = length(timestamps                     );
-
-% draw grids
-% grid_template = zeros(size(out_grid_all(:,:,:,1)), 'int8');
-% grid_template(1          , 1:end     , :) = 8^2; % first row
-% grid_template(1:end      , 1         , :) = 8^2; % first column
-% grid_template(10:10:end  , 1:end     , :) = 8^2; % everything in between
-% grid_template(1:end      , 10:10:end , :) = 8^2; % TODO: could replace with a color
-% out_grid_all = repmat(grid_template, 1,1,1,n_frames);
+n_joints            = size(     joint_positions_all         , 1         );
+n_frames            = length(   timestamps                              );
 
 % drawGrid (I, spcGrid, spcPoints, color)
 grid_template = zeros(size(out_grid_all(:,:,:,1)), 'int8');
@@ -101,15 +98,18 @@ fprintf('Calculating projective joint positions for all frames \n');
 
 % Re-shape joint_positions_all and split it up so it can be fed into
 % projectiveTransformation (x, y, z, to)
-%      TODO: would be nice if the projectiveTransformation function only
-%      took two args (p, to) and did this reshaping on its own
+%  TODO: 
+%    - would be nice if the projectiveTransformation function only took two
+%    args (p, to) and did the reshaping on its own
 j_pos_all_reshaped = reshape(permute(joint_positions_all, [2 1 3]), 3, n_frames*n_joints);
 j_pos_all_x = j_pos_all_reshaped(1,:);
 j_pos_all_y = j_pos_all_reshaped(2,:);
 j_pos_all_z = j_pos_all_reshaped(3,:);
+
 % feed individual x, y, and z lists into projectiveTransformation (x, y, z, to)
 [ j_pos_all_x_prjctd, j_pos_all_y_prjctd, j_pos_all_z_prjctd ] = ...
     projectiveTransformation(j_pos_all_x, j_pos_all_y, j_pos_all_z, 'projective');
+
 % build j_pos_all_projective from reshaped return vaules
 j_pos_all_reshaped_projective = [ j_pos_all_x_prjctd; j_pos_all_y_prjctd; j_pos_all_z_prjctd ];
 j_pos_all_projective = permute(reshape(j_pos_all_reshaped_projective, 3,n_joints,n_frames), [2 1 3]);
@@ -136,11 +136,9 @@ j_pos_all_projective2 = circshift(j_pos_all_projective, 1);
 % corespondence function needs
 %    TODO:
 %    - create a 3D thin plate function and update this to include z
-%    - add additional feature points along the lines of larger key limbs \
-%    torso
 out_j_features = [j_pos_all_projective(:, 1:2, :), j_pos_all_projective2(:, 1:2, :)];
 out_j_features = permute(out_j_features, [2,1,3]);
-% out_j_features = int8(out_j_features);
+
 % create dense correspondence fields one frame at a time
 if calcDenseCorr
     for iterator = 1:n_frames
