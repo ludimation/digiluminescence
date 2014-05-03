@@ -1,8 +1,32 @@
-%% 
-load('Images/20140429_data_fromDanKruse/david_kinect_data2.mat');
+%% Load data
+tic
+fprintf('====\n');
+fprintf('Demo :: Loading kinect data \n');
 
-%%
-[cleanPlate, digiluminescence_all] = digiluminescence(C_all, D_all, joint_positions_all, timestamps);
+% Only load data if the data has not yet been loaded
+if (...
+        ~exist('data_C_all'                 , 'var'	) | ...
+        ~exist('data_D_all'                 , 'var'	) | ...
+        ~exist('data_joint_positions_all'   , 'var' ) | ...
+        ~exist('data_timestamps'            , 'var' )...
+        )
+    load('Images/20140429_data_fromDanKruse/david_kinect_data2.mat');
+end
+
+% print time
+toc
+fprintf('====\n');
+
+%% Run digiluminescence
+n_framesToProcess = 300; % smaller test amount
+% n_framesToProcess = size(D_all, 3); % Uncomment this line for full data processing
+[ output_digiluminescence_all, output_cleanPlate, output_uMasks_all, output_denseCorr_all ] = ...
+    digiluminescence(...
+        data_C_all(:,:,:, 1:n_framesToProcess), ...
+        data_D_all(:,:, 1:n_framesToProcess), ...
+        data_joint_positions_all(:,:, 1:n_framesToProcess), ...
+        data_timestamps(1:n_framesToProcess)...
+    );
 
 %% Test display
 % % TODO: add imshow to this figure
