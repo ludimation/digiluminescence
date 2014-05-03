@@ -44,8 +44,8 @@ n_joints            = size(     joint_positions_all         , 1         );
 n_frames            = length(   timestamps                              );
 
 % Draw grids : drawGrid (I, spcGrid, spcPoints, color)
-grid_template = drawGrid(grid_template, 10, 2);
-out_grid_all = drawGrid(out_grid_all, 10, 1);
+grid_template   = drawGrid(grid_template    , 32, 2, [2^8, 2^8, 0]); % yellow
+out_grid_all    = drawGrid(out_grid_all     , 32, 1, [2^8, 2^8, 0]); % yellow
 
 % print time
 toc
@@ -132,15 +132,13 @@ out_j_features = [j_startingFeatures; j_endingFeatures];
 %    - add additional feature points along the lines of larger key limbs \
 %    torso
 %    - might also need a few additional features outside bounds of figure
-%    positions to "pin" down the surrounding frame of the image so it
+%    positions to "tack" down the surrounding frame of the image so it
 %    doesn't warp around so much
 
-%TODO: draw starting features large and limbs in white
-% drawCircles(points, I, radius, color)
-% drawPoints(points, I, size, color)
-% j_startingFeatures_size = size(j_startingFeatures)
-out_grid_all = drawPoints(j_startingFeatures, out_grid_all, 8, white(1)*2^8 );
-% drawLimbs(j_pos_all_projective, out_grid_all, 4, white(1)*2^8 )
+% draw joints in yellow: drawPoints(points, I, size, color)
+out_grid_all = drawPoints(j_startingFeatures, out_grid_all, 16, [2^8, 2^8, 0] ); % yellow
+%TODO: draw limbs in white
+% drawLimbs(j_pos_all_projective, out_grid_all, 4, [2^8, 2^8, 0] ); % yellow
 
 % cleanup
 clear j_pos_all_reshaped j_pos_all_reshaped_projective
@@ -169,11 +167,11 @@ if calcDenseCorr
 end
 
 % draw grid again sparser and blue to show where it started : drawGrid (I, spcGrid, spcPoints, color)
-out_grid_all = drawGrid(out_grid_all, 10, 2, [0,2^8, 2^8]);
-% TODO: draw starting joints in blue (small radius)
-out_grid_all = drawPoints(j_startingFeatures, out_grid_all, 4, [0,0,2^8] );
-% TODO: draw ending joints in magenta (small radius -- warped joints will appear in large white dots)
-out_grid_all = drawPoints(j_endingFeatures, out_grid_all, 4, [2^8,0,2^8] );
+out_grid_all = drawGrid(out_grid_all, 32, 4, [0 , 2^8 , 2^8]); % cyan
+% draw ending joints in magenta (small radius -- warped joints will appear as large yellow dots)
+out_grid_all = drawPoints(j_endingFeatures      , out_grid_all, 8, [2^8 , 0   , 2^8] ); % magenta
+% draw starting joints in blue (smaller radius)
+out_grid_all = drawPoints(j_startingFeatures    , out_grid_all, 6, [0   , 2^8 , 2^8] ); % cyan
 
 % cleanup
 clear j_pos_all_projective j_pos_all_projective2
@@ -322,7 +320,7 @@ function [ I ] = drawGrid (I, spcGrid, spcP, color)
 end
 
 %% DRAWPOINTS method
-function [ I ] = drawPoints(p_array, I, p_size, c_rgb)
+function [ I ] = drawPoints(p_array, I, sz_draw, c_rgb)
 % draws squares around point of the specified size and color into the image
 % provided
 
@@ -337,6 +335,8 @@ function [ I ] = drawPoints(p_array, I, p_size, c_rgb)
         c_rgb = white(1) * 2^8;
     end
     
+    sz_I = size(I);
+    I_px = -ones(sz_I, 'int8');
     % indeces must be rounded doubles / integers %TODO: might also want to
     % check values to make sure none of them are 0, nor max width and
     % height of I
@@ -347,7 +347,6 @@ function [ I ] = drawPoints(p_array, I, p_size, c_rgb)
     p_h = p_size(1);
     p_w = p_size(2);
     p_frames = p_size(3);
-    % TODO: add points to points array to account for point size 
     
     % build arrays of x coords, y coords, channel numbers, and frame
     % numbers starting with x so we can save out some properties that
@@ -363,15 +362,27 @@ function [ I ] = drawPoints(p_array, I, p_size, c_rgb)
 
     % create one array for each channel that contains the indexes of the
     % pixels to be colored
-    point_indexes_r = sub2ind(size(I), x_array, y_array, r_array, frame_array);
-    point_indexes_g = sub2ind(size(I), x_array, y_array, g_array, frame_array);
-    point_indexes_b = sub2ind(size(I), x_array, y_array, b_array, frame_array);
+    point_indexes_r = sub2ind(sz_I, x_array, y_array, r_array, frame_array);
+    point_indexes_g = sub2ind(sz_I, x_array, y_array, g_array, frame_array);
+    point_indexes_b = sub2ind(sz_I, x_array, y_array, b_array, frame_array);
     
     % color the pixels
-    I(point_indexes_r) = c_rgb(1);
-    I(point_indexes_g) = c_rgb(2);
-    I(point_indexes_b) = c_rgb(3);
+    I_px(point_indexes_r) = c_rgb(1);
+    I_px(point_indexes_g) = c_rgb(2);
+    I_px(point_indexes_b) = c_rgb(3);
 
+    % TODO: add points to points array to account for point size 
+    % start drawing at the top left of the point
+    sz_draw_half = round(sz_draw/2);
+    I_px = circshift(I_px, [-sz_draw_half,-sz_draw_half]);
+    for pos_x = 1:sz_draw
+        for pos_y = 1:sz_draw
+            I_tmp = circshift(I_px, [pos_x, pos_y]);
+            inds = find(I_tmp>-1);
+            I(inds) = I_tmp(inds);
+%             I = I + circshift(I_px, [pos_x, pos_y]);
+        end
+    end
 end
 
 
