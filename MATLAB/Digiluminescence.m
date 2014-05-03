@@ -169,34 +169,96 @@ fprintf('Creating digiluminescence effect frame by frame \n');
 % print time
 toc
 
-%% Save out some test images
-tic
+%% Save out test files
 fprintf('----\n');
 fprintf('Saving out some test files \n');
 
-% writerObj = VideoWriter(['test_01_Color.mp4'], 'MPEG-4');
-% open(writerObj);
-% 
+%%%%%%%%%%%%
+% images
+%%%%%%%%%%%%
+tic
+fprintf([' - images - ']);
+% TODO: include drawings of old, new, and warped positions of joints/limbs
+% in grid images
 imwrite( C_all(:,:,:,1)                     ,[ 'test_01_Color.png'          ]);
 imwrite(uint8( D_all(:,:,1) / 256 )         ,[ 'test_02_Depth.png'          ]);
-imwrite(uint8( out_D_cPlate / 256 )         ,[ 'test_03_Depth_cPlate.png'   ]);
-imwrite(uint8( out_uMasks_all(:,:,1) / 256 ),[ 'test_04_uMask.png'          ]);
-imwrite(uint8( out_denseCorr_all(:,:,:,1) ) ,[ 'test_05_denseCorr.png'      ]);
-imwrite(uint8( grid_template(:,:,:) )       ,[ 'test_06_grid_template.png'  ]);
-imwrite(uint8( out_grid_all(:,:,:,1) )      ,[ 'test_06_grid_warped.png'    ]);
-
-% TODO: save out warped grid image which should include drawings of old,
-% new, and warped positions of joints/limbs
-
-
-% dense correspondence field
-% effect
-
-% clean up memory
-clear C_all D_all joint_positions_all timestamps
-
+imwrite(uint8( out_D_cPlate / 256 )         ,[ 'test_02_Depth_cPlate.png'   ]);
+imwrite(uint8( out_uMasks_all(:,:,1) / 256 ),[ 'test_03_uMask.png'          ]);
+imwrite(uint8( out_denseCorr_all(:,:,:,1) ) ,[ 'test_04_denseCorr.png'      ]);
+imwrite(uint8( grid_template(:,:,:) )       ,[ 'test_05_grid_template.png'  ]);
+imwrite(uint8( out_grid_all(:,:,:,1) )      ,[ 'test_05_grid_warped.png'    ]);
 % print time
 toc
+
+%%%%%%%%%%%%
+% videos
+%%%%%%%%%%%%
+tic
+fprintf([' - videos - reformatting data - ']);
+% must have a [w,h,bitDepth, frames] array for video file writing
+D_all = permute(D_all, [1,2,4,3]);
+out_uMasks_all = permute(out_uMasks_all, [1,2,4,3]);
+% IMG must be of one of the following classes: double, single, uint8
+C_all                   = uint8(C_all                       );
+D_all                   = uint8(D_all               / 256   );
+out_uMasks_all          = uint8(out_uMasks_all      / 256   );
+out_denseCorr_all       = uint8(out_denseCorr_all           );
+out_grid_all            = uint8(out_grid_all                );
+% print time
+toc
+
+% C_all
+tic
+fprintf([' - videos - C_all - ']);
+writerObj = VideoWriter(['test_01_Color.mp4'], 'MPEG-4');
+open(writerObj);
+writeVideo(writerObj,C_all)
+close(writerObj);
+% print time
+toc
+
+% D_all
+tic
+fprintf([' - videos - D_all - ']);
+writerObj = VideoWriter(['test_02_Depth.mp4'], 'MPEG-4');
+open(writerObj);
+writeVideo(writerObj,D_all)
+close(writerObj);
+% print time
+toc
+
+% out_uMasks_all
+tic
+fprintf([' - videos - out_uMasks_all - ']);
+writerObj = VideoWriter(['test_03_uMask.mp4'], 'MPEG-4');
+open(writerObj);
+writeVideo(writerObj,out_uMasks_all)
+close(writerObj);
+% print time
+toc
+
+% out_denseCorr_all
+tic
+fprintf([' - videos - out_denseCorr_all - ']);
+writerObj = VideoWriter(['test_04_denseCorr.mp4'], 'MPEG-4');
+open(writerObj);
+writeVideo(writerObj,out_denseCorr_all)
+close(writerObj);
+% print time
+toc
+
+% out_grid_all
+tic
+fprintf([' - videos - out_grid_all - ']);
+writerObj = VideoWriter(['test_05_grid_warped.mp4'], 'MPEG-4');
+open(writerObj);
+writeVideo(writerObj,out_grid_all)
+close(writerObj);
+% print time
+toc
+
+% clean up memory
+clear C_all D_all joint_positions_all timestamps writerObj
 
 
 %% Report timestamp
