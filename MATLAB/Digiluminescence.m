@@ -38,7 +38,7 @@ n_frames            = length(timestamps                     );
 % print time
 toc
 
-%% Create a clean plate for the depth data
+%% Create a clean plate of the environment
 tic
 fprintf('----\n');
 fprintf('Creating clean plate for depth data \n');
@@ -51,7 +51,7 @@ out_D_cPlate = max(D_all,[],3);
 % print time
 toc
 
-%% Create user masks
+%% Create user masks using difference matting against environment clean plate
 tic
 fprintf('----\n');
 fprintf('Creating user masks \n');
@@ -61,14 +61,14 @@ fprintf('Creating user masks \n');
 % out_D_cPlate
 
 % clean up depth images by putting cPlate in areas that have no value
-inds_positive       = find(D_all > -8); 
-D_all_cPlate        = repmat(out_D_cPlate, [1,1,size(D_all,3)]);
-D_all_clean         = D_all_cPlate;
+inds_positive           = find(D_all > -8); 
+D_all_cPlate            = repmat(out_D_cPlate, [1,1,size(D_all,3)]);
+D_all_clean             = D_all_cPlate;
 D_all_clean(inds_positive) = D_all(inds_positive);
 % calculate masks for areas with large differences between the clean Depth
 % image and the cleanPlate
-D_all_diff          = abs(D_all_clean - D_all_cPlate);
-inds_BG             = find(abs(D_all_clean - D_all_cPlate) < 1024); %TODO: Make this threshold user-specifiable
+D_all_diff              = abs(D_all_clean - D_all_cPlate);
+inds_BG                 = find(abs(D_all_clean - D_all_cPlate) < 1024); %TODO: Make this threshold user-specifiable
 out_uMasks_all          = D_all_clean;
 out_uMasks_all(inds_BG) = -8;
 
@@ -108,9 +108,9 @@ clear j_pos_all_x_prjctd j_pos_all_y_prjctd j_pos_all_z_prjctd
 toc
 
 %% Calculate dense correspondence fields frame by frame
-tic
+% tic
 fprintf('----\n');
-fprintf('Calculating densedense correspondence fields frame by frame \n');
+fprintf('Calculating dense correspondence fields frame by frame \n');
 
 % Create second array for easy grabbing of one set of joints from the
 % previous frame (frame 1 is compared against frame n which doesn't quite
@@ -118,11 +118,14 @@ fprintf('Calculating densedense correspondence fields frame by frame \n');
 j_pos_all_projective2 = circshift(j_pos_all_projective, 1);
 
 % Create list of feature correspondences in a shape that thin plate dense
-% corespondence function can understand
-%    TODO: make this and the thin plate function 3D instead
+% corespondence function needs
+%    TODO:
+%    - create a 3D thin plate function and update this to include z
+%    - add additional feature points along the lines of larger key limbs \
+%    torso
 out_j_features = [j_pos_all_projective(:, 1:2, :), j_pos_all_projective2(:, 1:2, :)];
 out_j_features = permute(out_j_features, [2,1,3]);
-
+% out_j_features = int8(out_j_features);
 % create dense correspondence fields one frame at a time
 for iterator = 1:size(out_j_features, 3)
 %     out_denseCorr_all(:,:, iterator) = ...
