@@ -26,3 +26,10 @@
 
 # Mac OSX files
 *.DS_Store
+MATLAB/nArgOrderTest.m
+MATLAB/Images/20140429_data_fromDanKruse/david_kinect_data.mat
+MATLAB/Images/20140429_data_fromDanKruse/david_kinect_data2_newD.mat
+OPENFRAMEWORKS/bin/data/test_20140501_1911.oni
+OPENFRAMEWORKS/bin/data/test_20140501_1915.oni
+OPENFRAMEWORKS/bin/data/test_20140501_1926.oni
+OPENFRAMEWORKS/bin/data/test_20140501_1932.oni
