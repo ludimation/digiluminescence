@@ -106,7 +106,23 @@ toc
 
 
 %% Calculate dense correspondence fields frame by frame
+tic
+fprintf('----\n');
+fprintf('Calculating densedense correspondence fields frame by frame \n');
 
+% create second array for easy grabbing of one set of joints and the
+% previous frame (frame 1 is compared against frame n just to see what
+% happens)
+j_pos_all_projective2 = circshift(j_pos_all_projective, 1);
+
+% create dense correspondence fields
+for iterator = 1:size(j_pos_all_projective, 3)
+    j_pos_all_projective(:,1:2,iterator)';
+    j_pos_all_projective2(:,1:2,iterator)';
+end
+
+% print time
+toc
 
 %% Create digiluminescence effect from dense correspondence fields
 
