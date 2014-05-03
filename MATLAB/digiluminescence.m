@@ -113,6 +113,15 @@ j_pos_all_z = j_pos_all_reshaped(3,:);
 % build j_pos_all_projective from reshaped return vaules
 j_pos_all_reshaped_projective = [ j_pos_all_x_prjctd; j_pos_all_y_prjctd; j_pos_all_z_prjctd ];
 j_pos_all_projective = permute(reshape(j_pos_all_reshaped_projective, 3,n_joints,n_frames), [2 1 3]);
+j_startingFeatures = permute(j_pos_all_projective(:, 1:2, :), [2,1,3]);
+j_endingFeatures = permute(circshift(j_pos_all_projective(:, 1:2, :), -1), [2,1,3]);
+
+
+%TODO: draw starting features large and limbs in white
+% drawCircles(points, I, radius, color)
+% drawPoints(points, I, size, color)
+drawPoints(j_startingFeatures, out_grid_all, 8, white(1)*2^8 );
+% drawLimbs(j_pos_all_projective, out_grid_all, 4, white(1)*2^8 )
 
 % cleanup
 clear j_pos_all_reshaped j_pos_all_reshaped_projective
@@ -130,7 +139,7 @@ fprintf('Calculating dense correspondence fields frame by frame \n');
 % Create second array for easy grabbing of one set of joints from the
 % previous frame (frame 1 is compared against frame n which doesn't quite
 % make sense, but I'd just like to see what happens)
-j_pos_all_projective2 = circshift(j_pos_all_projective, 1);
+j_pos_all_projective2 = circshift(j_pos_all_projective, -1);
 
 % Create list of feature correspondences in a shape that thin plate dense
 % corespondence function needs
@@ -154,6 +163,11 @@ end
 
 % draw grid again sparser and blue to show where it started : drawGrid (I, spcGrid, spcPoints, color)
 out_grid_all = drawGrid(out_grid_all, 10, 2, [0,2^8, 2^8]);
+% TODO: draw starting joints in blue (small radius)
+drawPoints(j_startingFeatures, out_grid_all, 4, [0,0,2^8] );
+% TODO: draw ending joints in magenta (small radius -- warped joints will appear in large white dots)
+drawPoints(j_endingFeatures, out_grid_all, 4, [2^8,0,2^8] );
+
 % cleanup
 clear j_pos_all_projective j_pos_all_projective2
 clear iterator denseCorr grid
