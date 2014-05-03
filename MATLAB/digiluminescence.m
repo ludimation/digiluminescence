@@ -186,13 +186,13 @@ tic
 fprintf([' - images - ']);
 % TODO: include drawings of old, new, and warped positions of joints/limbs
 % in grid images
-imwrite( C_all(:,:,:,1)                     ,[ 'test_01_Color.png'          ]);
-imwrite(uint8( D_all(:,:,1) / 256 )         ,[ 'test_02_Depth.png'          ]);
-imwrite(uint8( out_D_cPlate / 256 )         ,[ 'test_02_Depth_cPlate.png'   ]);
-imwrite(uint8( out_uMasks_all(:,:,1) / 256 ),[ 'test_03_uMask.png'          ]);
-imwrite(uint8( out_denseCorr_all(:,:,:,1) ) ,[ 'test_04_denseCorr.png'      ]);
-imwrite(uint8( grid_template(:,:,:) )       ,[ 'test_05_grid_template.png'  ]);
-imwrite(uint8( out_grid_all(:,:,:,1) )      ,[ 'test_05_grid_warped.png'    ]);
+imwrite( C_all(:,:,:,1)                             ,[ 'test_01_Color.png'          ]);
+imwrite(uint8( D_all(:,:,1)                 / 2^8 ) ,[ 'test_02_Depth.png'          ]);
+imwrite(uint8( out_D_cPlate                 / 2^8 ) ,[ 'test_02_Depth_cPlate.png'   ]);
+imwrite(uint8( out_uMasks_all(:,:,1)        / 2^8 ) ,[ 'test_03_uMask.png'          ]);
+imwrite(uint8( out_denseCorr_all(:,:,:,1) )         ,[ 'test_04_denseCorr.png'      ]);
+imwrite(uint8( grid_template(:,:,:) )               ,[ 'test_05_grid_template.png'  ]);
+imwrite(uint8( out_grid_all(:,:,:,1) )              ,[ 'test_05_grid_warped.png'    ]);
 % print time
 toc
 
@@ -206,8 +206,8 @@ D_all = permute(D_all, [1,2,4,3]);
 out_uMasks_all = permute(out_uMasks_all, [1,2,4,3]);
 % IMG must be of one of the following classes: double, single, uint8
 C_all                   = uint8(C_all                       );
-D_all                   = uint8(D_all               / 256   );
-out_uMasks_all          = uint8(out_uMasks_all      / 256   );
+D_all                   = uint8(D_all               / 2^8   );
+out_uMasks_all          = uint8(out_uMasks_all      / 2^8   );
 out_denseCorr_all       = uint8(out_denseCorr_all           );
 out_grid_all            = uint8(out_grid_all                );
 % print time
