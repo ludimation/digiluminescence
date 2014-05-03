@@ -23,6 +23,20 @@ function [ out_denseCorrespondence, out_I_interp, out_w, out_a, out_b ] = thin_p
 %   the feature correspondence pairs.
 %
 
+%% Handle default arguments
+for i = 1 % For loop is for code collapsing only (so I don't have to look at these)
+
+    no_out_I_interp = false;
+    
+    % set default value of no_out_I_interp based on whether or not there is
+    % an out argument for the interpoloated image
+    if( nargout < 2 )
+        no_out_I_interp = true;
+    end
+   
+end
+
+
 %% Setup key variables
 
 % store some sizes for future reference
@@ -96,17 +110,19 @@ out_denseCorrespondence(:,:,2) = reshape((x_interps(2,:) - yy'), im_sz_wh(1),im_
 % out_denseCorrespondence(:,:,3) = 2^8; % TODO: temporarily storing 100% in this channel, but should eventually include z in dense correspondence calculations
 out_denseCorrespondence(:,:,3) = int8(2^8-1); % TODO: temporarily storing 100% in this channel, but should eventually include z in dense correspondence calculations
 
+if ~no_out_I_interp
+    vr = reshape(in_I(:,:,1),n_pix_inputs,1);
+    vg = reshape(in_I(:,:,2),n_pix_inputs,1);
+    vb = reshape(in_I(:,:,3),n_pix_inputs,1);
 
-vr = reshape(in_I(:,:,1),n_pix_inputs,1);
-vg = reshape(in_I(:,:,2),n_pix_inputs,1);
-vb = reshape(in_I(:,:,3),n_pix_inputs,1);
+    Fr = scatteredInterpolant(xx, yy, vr);
+    Fg = scatteredInterpolant(xx, yy, vg);
+    Fb = scatteredInterpolant(xx, yy, vb);
 
-Fr = scatteredInterpolant(xx, yy, vr);
-Fg = scatteredInterpolant(xx, yy, vg);
-Fb = scatteredInterpolant(xx, yy, vb);
+    out_I_interp(:,:,1) = reshape(Fr(x_interps(1,:)',x_interps(2,:)'),im_sz_wh(1),im_sz_wh(2));
+    out_I_interp(:,:,2) = reshape(Fg(x_interps(1,:)',x_interps(2,:)'),im_sz_wh(1),im_sz_wh(2));
+    out_I_interp(:,:,3) = reshape(Fb(x_interps(1,:)',x_interps(2,:)'),im_sz_wh(1),im_sz_wh(2));
+end
 
-out_I_interp(:,:,1) = reshape(Fr(x_interps(1,:)',x_interps(2,:)'),im_sz_wh(1),im_sz_wh(2));
-out_I_interp(:,:,2) = reshape(Fg(x_interps(1,:)',x_interps(2,:)'),im_sz_wh(1),im_sz_wh(2));
-out_I_interp(:,:,3) = reshape(Fb(x_interps(1,:)',x_interps(2,:)'),im_sz_wh(1),im_sz_wh(2));
 end
 
