@@ -1,4 +1,5 @@
-function [ out_dl_all, out_D_cPlate, out_uMasks_all, out_j_features, out_denseCorr_all, out_grid_all ] = digiluminescence(C_all, D_all, joint_positions_all, timestamps)
+function [ out_dl_all, out_D_cPlate, out_uMasks_all, out_j_features, out_denseCorr_all, out_grid_all ] = ...
+    digiluminescence(C_all, D_all, joint_positions_all, timestamps, calcDenseCorr)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -13,8 +14,8 @@ fprintf('Handling default arguments \n');
 for i = 1 % For loop is for code collapsing only (so I don't have to look at these)
 
     % set default value for first argument
-    if( nargin < 1 )
-        ;
+    if( nargin < 5 )
+        calcDenseCorr = false;
     end
    
 end
@@ -136,14 +137,16 @@ out_j_features = [j_pos_all_projective(:, 1:2, :), j_pos_all_projective2(:, 1:2,
 out_j_features = permute(out_j_features, [2,1,3]);
 % out_j_features = int8(out_j_features);
 % create dense correspondence fields one frame at a time
-for iterator = 1:n_frames
-    tic
-        fprintf([' - frame ' num2str(iterator) ' - ']);
-        [ denseCorr, grid ] = thin_plate_denseCorrespondence(out_j_features(:, :, iterator), out_grid_all(:,:,:, iterator) );
-        out_denseCorr_all(:,:,:, iterator) = denseCorr;
-        out_grid_all(:,:,:, iterator) = grid;
-    % print time
-    toc
+if calcDenseCorr
+    for iterator = 1:n_frames
+        tic
+            fprintf([' - frame ' num2str(iterator) ' - ']);
+            [ denseCorr, grid ] = thin_plate_denseCorrespondence(out_j_features(:, :, iterator), out_grid_all(:,:,:, iterator) );
+            out_denseCorr_all(:,:,:, iterator) = denseCorr;
+            out_grid_all(:,:,:, iterator) = grid;
+        % print time
+        toc
+    end
 end
 
 % cleanup
