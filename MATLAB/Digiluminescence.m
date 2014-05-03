@@ -43,7 +43,6 @@ tic
 fprintf('----\n');
 fprintf('Creating clean plate for depth data \n');
 
-% TODO: save this out
 % out_D_cPlate is an image that represents the background of the scene,
 % which is essentially the maximum depth values found in all frames of the
 % depth data
@@ -137,7 +136,22 @@ fprintf('Creating digiluminescence effect frame by frame \n');
 
 % print time
 toc
+
+%% Save out some test images
+tic
 fprintf('----\n');
+fprintf('Saving out some test images \n');
+
+imwrite( C_all(:,:,:,1)                     ,[ 'test_01_Color.png'         ]);
+imwrite(uint8( D_all(:,:,1) / 256 )         ,[ 'test_02_Depth.png'         ]);
+imwrite(uint8( out_D_cPlate / 256 )         ,[ 'test_03_Depth_cPlate.png'  ]);
+imwrite(uint8( out_uMasks_all(:,:,1) / 256 ),[ 'test_04_uMask.png'         ]);
+% dense correspondence field
+% effect
+
+% clean up memory
+clear C_all D_all joint_positions_all timestamps
+
 % print time
 toc
 
