@@ -56,7 +56,27 @@ out_D_cPlate = max(D_all,[],3); % does same as above, without a for loop
 % print time
 toc
 
+%% Create user masks
+tic
 fprintf('----\n');
+fprintf('Creating user masks \n');
+
+% clean up depth images by putting cPlate in areas that have no value
+inds_positive       = find(D_all > -8); 
+D_all_cPlate        = repmat(out_D_cPlate, [1,1,size(D_all,3)]);
+D_all_clean         = D_all_cPlate;
+D_all_clean(inds_positive) = D_all(inds_positive);
+% calculate the difference between the clean Depth image and the cleanPlate
+% (BG)
+D_all_diff          = abs(D_all_clean - D_all_cPlate);
+inds_BG             = find(abs(D_all_clean - D_all_cPlate) < 1024); %TODO: Make this threshold user-specifiable
+out_uMasks_all          = D_all_clean;
+out_uMasks_all(inds_BG) = -8;
+
+% clean up
+clear inds_positive inds_BG
+clear D_all_cPlate D_all_clean D_all_diff
+
 % print time
 toc
 
