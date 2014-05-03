@@ -38,12 +38,17 @@ n_joints            = size(joint_positions_all  , 1         );
 n_frames            = length(timestamps                     );
 
 % draw grids
+% grid_template = zeros(size(out_grid_all(:,:,:,1)), 'int8');
+% grid_template(1          , 1:end     , :) = 8^2; % first row
+% grid_template(1:end      , 1         , :) = 8^2; % first column
+% grid_template(10:10:end  , 1:end     , :) = 8^2; % everything in between
+% grid_template(1:end      , 10:10:end , :) = 8^2; % TODO: could replace with a color
+% out_grid_all = repmat(grid_template, 1,1,1,n_frames);
+
+% drawGrid (I, spcGrid, spcPoints, color)
 grid_template = zeros(size(out_grid_all(:,:,:,1)), 'int8');
-grid_template(1          , 1:end     , :) = 8^2; % first row
-grid_template(1:end      , 1         , :) = 8^2; % first column
-grid_template(10:10:end  , 1:end     , :) = 8^2; % everything in between
-grid_template(1:end      , 10:10:end , :) = 8^2; % TODO: could replace with a color
-out_grid_all = repmat(grid_template, 1,1,1,n_frames);
+grid_template = drawGrid(grid_template, 10, 2, [2^8, 2^8, 0]);
+out_grid_all = drawGrid(out_grid_all, 10, 1, [2^8, 2^8, 0]);
 
 % print time
 toc
@@ -267,7 +272,33 @@ fprintf('====\n');
 fprintf('Digiluminescence :: End\n'); 
 %TODO: figure out a way to print all elapsed time for this function
 fprintf('====\n');
+end
 
+%% Local methods
+function [ I ] = drawGrid (I, spcGrid, spcPoints, color)
+    if nargin < 2
+        spcGrid = 10;
+    end
+    if nargin < 3
+        spcPoints = 1;
+    end
+    if nargin < 4
+        color = white(1) * 2^8;
+    end
+    
+    I(1                     , 1:spcPoints:end       , 1,:) = color(1); % first row r
+    I(1                     , 1:spcPoints:end       , 2,:) = color(2); % first row g
+    I(1                     , 1:spcPoints:end       , 3,:) = color(3); % first row b
+    I(1:spcPoints:end       , 1                     , 1,:) = color(1); % first column r
+    I(1:spcPoints:end       , 1                     , 2,:) = color(2); % first column g
+    I(1:spcPoints:end       , 1                     , 3,:) = color(3); % first column b
+    I(spcGrid:spcGrid:end   , 1:spcPoints:end       , 1,:) = color(1); % everything in between r
+    I(spcGrid:spcGrid:end   , 1:spcPoints:end       , 2,:) = color(2); % everything in between g
+    I(spcGrid:spcGrid:end   , 1:spcPoints:end       , 3,:) = color(3); % everything in between b
+    I(1:spcPoints:end       , 10:spcGrid:end        , 1,:) = color(1); 
+    I(1:spcPoints:end       , 10:spcGrid:end        , 2,:) = color(2);
+    I(1:spcPoints:end       , 10:spcGrid:end        , 3,:) = color(3); % TODO: there HAS to be a more elegant way to do this
+end
 
 
 %% Load images
