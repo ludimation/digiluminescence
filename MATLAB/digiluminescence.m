@@ -294,7 +294,7 @@ fprintf('Digiluminescence :: End\n');
 fprintf('====\n');
 end
 
-%% Local methods
+%% DRAWGRID method
 function [ I ] = drawGrid (I, spcGrid, spcP, color)
     if nargin < 2
         spcGrid = 10;
@@ -320,6 +320,7 @@ function [ I ] = drawGrid (I, spcGrid, spcP, color)
     I(spcP:spcP:end         , 10:spcGrid:end      , 3,:) = color(3); % TODO: there HAS to be a more elegant way to do this
 end
 
+%% DRAWPOINTS method
 function [ I ] = drawPoints(points, I, size, color)
 % draws squares around point of the specified size and color into the image
 % provided
@@ -341,10 +342,10 @@ function [ I ] = drawPoints(points, I, size, color)
     % TODO: add points to points array to account for point size 
     
     % build arrays of x coords, y coords, channel numbers, and frame numbers
-    xArray = points(1,:,:)
-    yArray = points(2,:,:)
-    size_points = size(points,1)
-    size_search = size(xArray,1)
+    xArray = points(1,:,:);
+    yArray = points(2,:,:);
+%     size_points = size(points,1)
+%     size_search = size(xArray,1)
 %     rArray = ones(search_size)     ;
 %     gArray = ones(search_size) *2  ;%repmat(2, size(xArray));
 %     bArray = ones(search_size) *3  ;%repmat(3, size(xArray));
