@@ -1,9 +1,9 @@
-function [ out_w, out_a, out_b, out_I_interp, out_denseCorrespondence] = thin_plate_denseCorrespondence(in_feature_pairs, in_I)
+function [ out_denseCorrespondence, out_I_interp, out_w, out_a, out_b ] = thin_plate_denseCorrespondence(in_feature_pairs, in_I)
 %THIN_PLATE_DENSECORRESPONDENCE 
 % Based on script provided by Il-Young Son as example of 
 %     Scattered Data Interpolation
 %
-% [w, a, b, I_interp, denseCorrespondence] = thin_plate_denseCorrespondence(feature_pairs, I)
+% [denseCorrespondence, I_interp, w, a, b ] = thin_plate_denseCorrespondence(feature_pairs, I)
 %
 % INPUTS:
 %
@@ -27,8 +27,8 @@ function [ out_w, out_a, out_b, out_I_interp, out_denseCorrespondence] = thin_pl
 
 % store some sizes for future reference
 n_feats = size(in_feature_pairs,2);
-im_sz = size(I);
-im_sz = im_sz(1:2);
+im_sz = size(in_I);
+im_sz_wh = im_sz(1:2);
 % im_sz = [size(in_I,1), size(in_I,2)]; % same as previous two lines?
 
 % reformat I -- why is this necessary?
@@ -67,11 +67,11 @@ out_b = x(end,:); % [ 1 x 2 ] matrix for [b1, b2]
 % create a [pixCount x 2] matrix of all the x,y pixel indixes possible in
 % image I (pix_inputs) to feed into the correspondence formula
 % store length of this list for future use
-n_pix_inputs = prod(im_sz);
-xx = 1:im_sz(1); % list of all x indixes [1,2,3,..., im_sz(1)]
-yy = 1:im_sz(2); % list of all y indixes [1,2,3,..., im_sz(2)]
-xx = reshape(repmat(xx',1,im_sz(2)),n_pix_inputs,1); % complete list of repeating cycles of x indeces [1;2;3;...;n;1;2;3;...;n;...]
-yy = reshape(repmat(yy,im_sz(1),1),n_pix_inputs,1); % complete list of stacked increasing y values [1;1;1;...;2;2;2;...;n;n;n;...]
+n_pix_inputs = prod(im_sz_wh);
+xx = 1:im_sz_wh(1); % list of all x indixes [1,2,3,..., im_sz(1)]
+yy = 1:im_sz_wh(2); % list of all y indixes [1,2,3,..., im_sz(2)]
+xx = reshape(repmat(xx',1,im_sz_wh(2)),n_pix_inputs,1); % complete list of repeating cycles of x indeces [1;2;3;...;n;1;2;3;...;n;...]
+yy = reshape(repmat(yy,im_sz_wh(1),1),n_pix_inputs,1); % complete list of stacked increasing y values [1;1;1;...;2;2;2;...;n;n;n;...]
 pix_inputs = [xx yy]'; % [1,1; 2,1; 3,1; ...; n,1; 1,2; 2,2; 3,2; ...; n,2; ...]
 
 % construct r_1 matrix to feed into phi_dc % TODO: still don't fully understand how this is constructed
@@ -86,8 +86,16 @@ r_i(find(r_i==0)) = 1;
 % compute phi_dc for dense correspondence formula
 phi_dc = (r_i.^2).*(log(r_i));
 
-% interpolate points for dense correspondence
+% create dense correspondence field
 x_interps = out_w'*phi_dc + out_a'*pix_inputs + repmat(out_b',1,n_pix_inputs);
+
+% reshape dense correspondence field into x, y, and (TODO:) z vectors
+out_denseCorrespondence = zeros(im_sz,'int8');
+out_denseCorrespondence(:,:,1) = reshape((x_interps(1,:) - xx'), im_sz_wh(1),im_sz_wh(2));
+out_denseCorrespondence(:,:,2) = reshape((x_interps(2,:) - yy'), im_sz_wh(1),im_sz_wh(2));
+% out_denseCorrespondence(:,:,3) = 2^8; % TODO: temporarily storing 100% in this channel, but should eventually include z in dense correspondence calculations
+out_denseCorrespondence(:,:,3) = int8(2^8-1); % TODO: temporarily storing 100% in this channel, but should eventually include z in dense correspondence calculations
+
 
 vr = reshape(in_I(:,:,1),n_pix_inputs,1);
 vg = reshape(in_I(:,:,2),n_pix_inputs,1);
@@ -97,8 +105,8 @@ Fr = scatteredInterpolant(xx, yy, vr);
 Fg = scatteredInterpolant(xx, yy, vg);
 Fb = scatteredInterpolant(xx, yy, vb);
 
-out_I_interp(:,:,1) = reshape(Fr(x_interps(1,:)',x_interps(2,:)'),im_sz(1),im_sz(2));
-out_I_interp(:,:,2) = reshape(Fg(x_interps(1,:)',x_interps(2,:)'),im_sz(1),im_sz(2));
-out_I_interp(:,:,3) = reshape(Fb(x_interps(1,:)',x_interps(2,:)'),im_sz(1),im_sz(2));
+out_I_interp(:,:,1) = reshape(Fr(x_interps(1,:)',x_interps(2,:)'),im_sz_wh(1),im_sz_wh(2));
+out_I_interp(:,:,2) = reshape(Fg(x_interps(1,:)',x_interps(2,:)'),im_sz_wh(1),im_sz_wh(2));
+out_I_interp(:,:,3) = reshape(Fb(x_interps(1,:)',x_interps(2,:)'),im_sz_wh(1),im_sz_wh(2));
 end
 
