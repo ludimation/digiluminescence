@@ -300,6 +300,48 @@ function [ I ] = drawGrid (I, spcGrid, spcP, color)
     I(spcP:spcP:end         , 10:spcGrid:end      , 3,:) = color(3); % TODO: there HAS to be a more elegant way to do this
 end
 
+function [ I ] = drawPoints(points, I, size, color)
+% draws squares around point of the specified size and color into the image
+% provided
+    narginMin = 2;
+    narginMax = 4;
+    narginchk(narginMin, narginMax);
+
+    if nargin < 3
+        size = 8;
+    end
+    if nargin < 4
+        color = white(1) * 2^8;
+    end
+    
+    % indeces must be integers %TODO: might also want to check values to
+    % make sure none of them are 0, nor max width and height of I
+    points = int8(points);
+    
+    % TODO: add points to points array to account for point size 
+    
+    % build arrays of x coords, y coords, channel numbers, and frame numbers
+    xArray = points(1,:,:)
+    yArray = points(2,:,:)
+    size_points = size(points,1)
+    size_search = size(xArray,1)
+%     rArray = ones(search_size)     ;
+%     gArray = ones(search_size) *2  ;%repmat(2, size(xArray));
+%     bArray = ones(search_size) *3  ;%repmat(3, size(xArray));
+%     frameArray = reshape(repmat(1:size(xArray,3), [size(xArray,2),1,1]), size(xArray));
+%     
+%     % create one array for each channel that contains the indexes of the
+%     % pixels to be colored
+%     point_indexes_r = sub2ind(size(I), xArray, yArray, rArray, frameArray);
+%     point_indexes_g = sub2ind(size(I), xArray, yArray, gArray, frameArray);
+%     point_indexes_b = sub2ind(size(I), xArray, yArray, bArray, frameArray);
+%     
+%     % color the pixels
+%     I(point_indexes_r) = color(1);
+%     I(point_indexes_g) = color(2);
+%     I(point_indexes_b) = color(3);
+
+end
 
 %% Load images
 % % TODO: Generalize this into a GUI that allows you to select images
