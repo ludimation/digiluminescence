@@ -125,6 +125,9 @@ end
 toc
 
 %% Create digiluminescence effect from dense correspondence fields
+tic
+fprintf('----\n');
+fprintf('Creating digiluminescence effect frame by frame \n');
 
 % Mask dense correspondence field with movement mask
 
@@ -132,6 +135,8 @@ toc
 
 % Draw colored lines along vectors of the field
 
+% print time
+toc
 fprintf('----\n');
 % print time
 toc
