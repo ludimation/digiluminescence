@@ -116,6 +116,12 @@ j_pos_all_projective = permute(reshape(j_pos_all_reshaped_projective, 3,n_joints
 j_startingFeatures = permute(j_pos_all_projective(:, 1:2, :), [2,1,3]);
 j_endingFeatures = permute(circshift(j_pos_all_projective(:, 1:2, :), -1), [2,1,3]);
 
+% TODO: 
+%    - add additional feature points along the lines of larger key limbs \
+%    torso
+%    - might also need a few additional features outside bounds of figure
+%    positions to "pin" down the surrounding frame of the image so it
+%    doesn't warp around so much
 
 %TODO: draw starting features large and limbs in white
 % drawCircles(points, I, radius, color)
