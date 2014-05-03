@@ -1,4 +1,4 @@
-function [ out_dl_all, out_D_cPlate, out_uMasks_all, out_j_features, out_denseCorr_all ] = digiluminescence(C_all, D_all, joint_positions_all, timestamps)
+function [ out_dl_all, out_D_cPlate, out_uMasks_all, out_j_features, out_denseCorr_all, out_grid_all ] = digiluminescence(C_all, D_all, joint_positions_all, timestamps)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -30,10 +30,19 @@ fprintf('Initializing variables \n');
 out_D_cPlate                = zeros(size(D_all(:,:,1))  , 'int16'   );
 out_uMasks_all              = zeros(size(D_all)         , 'int16'   );
 out_denseCorr_all           = zeros(size(C_all)         , 'int8'    );
+out_grid_all                = zeros(size(C_all)         , 'int8'    );
 out_dl_all                  = zeros(size(C_all)         , 'int8'    );
 
 n_joints            = size(joint_positions_all  , 1         );
 n_frames            = length(timestamps                     );
+
+% draw grids
+grid_template = zeros(size(out_grid_all(:,:,:,1)), 'int8');
+grid_template(1          , 1:end     , :) = 8^2; % first row
+grid_template(1:end      , 1         , :) = 8^2; % first column
+grid_template(10:10:end  , 1:end     , :) = 8^2; % everything in between
+grid_template(1:end      , 10:10:end , :) = 8^2; % TODO: could replace with a color
+out_grid_all = repmat(grid_template, 1,1,1,n_frames);
 
 % print time
 toc
@@ -127,13 +136,24 @@ out_j_features = [j_pos_all_projective(:, 1:2, :), j_pos_all_projective2(:, 1:2,
 out_j_features = permute(out_j_features, [2,1,3]);
 % out_j_features = int8(out_j_features);
 % create dense correspondence fields one frame at a time
-for iterator = 1:size(out_j_features, 3)
-%     out_denseCorr_all(:,:, iterator) = ...
-%         thin_plate_denseCorrespondence(out_j_features(:, :, iterator))
+for iterator = 1:n_frames
+    tic
+    % TODO: create a grid to feed into this function instead
+    [ denseCorr, grid ] = thin_plate_denseCorrespondence(out_j_features(:, :, iterator), out_grid_all(:,:,:, iterator) );
+    %     denseCorr = thin_plate_denseCorrespondence(out_j_features(:, :, iterator), out_grid_all(:,:,:, iterator) );
+    out_denseCorr_all(:,:,:, iterator) = denseCorr;
+    out_grid_all(:,:,:, iterator) = grid;
+    % print time
+    fprintf([' - frame ' num2str(iterator) ' - ']);
+    toc
 end
 
+% cleanup
+clear j_pos_all_projective j_pos_all_projective2
+clear iterator denseCorr grid
+
 % print time
-toc
+% toc
 
 %% Create digiluminescence effect from dense correspondence fields
 tic
@@ -152,12 +172,21 @@ toc
 %% Save out some test images
 tic
 fprintf('----\n');
-fprintf('Saving out some test images \n');
+fprintf('Saving out some test files \n');
 
-imwrite( C_all(:,:,:,1)                     ,[ 'test_01_Color.png'         ]);
-imwrite(uint8( D_all(:,:,1) / 256 )         ,[ 'test_02_Depth.png'         ]);
-imwrite(uint8( out_D_cPlate / 256 )         ,[ 'test_03_Depth_cPlate.png'  ]);
-imwrite(uint8( out_uMasks_all(:,:,1) / 256 ),[ 'test_04_uMask.png'         ]);
+% writerObj = VideoWriter(['test_01_Color.mp4'], 'MPEG-4');
+imwrite( C_all(:,:,:,1)                     ,[ 'test_01_Color.png'          ]);
+imwrite(uint8( D_all(:,:,1) / 256 )         ,[ 'test_02_Depth.png'          ]);
+imwrite(uint8( out_D_cPlate / 256 )         ,[ 'test_03_Depth_cPlate.png'   ]);
+imwrite(uint8( out_uMasks_all(:,:,1) / 256 ),[ 'test_04_uMask.png'          ]);
+imwrite(uint8( out_denseCorr_all(:,:,:,1) ) ,[ 'test_05_denseCorr.png'      ]);
+imwrite(uint8( grid_template(:,:,:) )       ,[ 'test_06_grid_template.png'  ]);
+imwrite(uint8( out_grid_all(:,:,:,1) )      ,[ 'test_06_grid_warped.png'    ]);
+
+% TODO: save out warped grid image which should include drawings of old,
+% new, and warped positions of joints/limbs
+
+
 % dense correspondence field
 % effect
 
