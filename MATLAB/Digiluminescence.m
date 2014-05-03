@@ -60,13 +60,17 @@ tic
 fprintf('----\n');
 fprintf('Creating user masks \n');
 
+% out_uMasks_all holds one mask for each frame that represents the part of
+% each depth image that varies from the previously calculated cleanplate,
+% out_D_cPlate
+
 % clean up depth images by putting cPlate in areas that have no value
 inds_positive       = find(D_all > -8); 
 D_all_cPlate        = repmat(out_D_cPlate, [1,1,size(D_all,3)]);
 D_all_clean         = D_all_cPlate;
 D_all_clean(inds_positive) = D_all(inds_positive);
-% calculate the difference between the clean Depth image and the cleanPlate
-% (BG)
+% calculate masks for areas with large differences between the clean Depth
+% image and the cleanPlate
 D_all_diff          = abs(D_all_clean - D_all_cPlate);
 inds_BG             = find(abs(D_all_clean - D_all_cPlate) < 1024); %TODO: Make this threshold user-specifiable
 out_uMasks_all          = D_all_clean;
