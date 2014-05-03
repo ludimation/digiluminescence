@@ -37,15 +37,15 @@ out_D_cPlate       	= zeros(    size(D_all(:,:,1))          , 'int16'   );
 out_uMasks_all      = zeros(    size(D_all)                 , 'int16'   );
 out_denseCorr_all   = zeros(    size(C_all)                 , 'int8'    );
 out_grid_all        = zeros(    size(C_all)                 , 'int8'    );
+grid_template       = zeros(    size(out_grid_all(:,:,:,1)) , 'int8'    );
 out_dl_all          = zeros(    size(C_all)                 , 'int8'    );
 
 n_joints            = size(     joint_positions_all         , 1         );
 n_frames            = length(   timestamps                              );
 
-% drawGrid (I, spcGrid, spcPoints, color)
-grid_template = zeros(size(out_grid_all(:,:,:,1)), 'int8');
-grid_template = drawGrid(grid_template, 10, 2, [2^8, 2^8, 0]);
-out_grid_all = drawGrid(out_grid_all, 10, 1, [2^8, 2^8, 0]);
+% Draw grids : drawGrid (I, spcGrid, spcPoints, color)
+grid_template = drawGrid(grid_template, 10, 2);
+out_grid_all = drawGrid(out_grid_all, 10, 1);
 
 % print time
 toc
@@ -152,6 +152,8 @@ if calcDenseCorr
     end
 end
 
+% draw grid again sparser and blue to show where it started : drawGrid (I, spcGrid, spcPoints, color)
+out_grid_all = drawGrid(out_grid_all, 10, 2, [0,2^8, 2^8]);
 % cleanup
 clear j_pos_all_projective j_pos_all_projective2
 clear iterator denseCorr grid
@@ -273,29 +275,29 @@ fprintf('====\n');
 end
 
 %% Local methods
-function [ I ] = drawGrid (I, spcGrid, spcPoints, color)
+function [ I ] = drawGrid (I, spcGrid, spcP, color)
     if nargin < 2
         spcGrid = 10;
     end
     if nargin < 3
-        spcPoints = 1;
+        spcP = 1;
     end
     if nargin < 4
         color = white(1) * 2^8;
     end
     
-    I(1                     , 1:spcPoints:end       , 1,:) = color(1); % first row r
-    I(1                     , 1:spcPoints:end       , 2,:) = color(2); % first row g
-    I(1                     , 1:spcPoints:end       , 3,:) = color(3); % first row b
-    I(1:spcPoints:end       , 1                     , 1,:) = color(1); % first column r
-    I(1:spcPoints:end       , 1                     , 2,:) = color(2); % first column g
-    I(1:spcPoints:end       , 1                     , 3,:) = color(3); % first column b
-    I(spcGrid:spcGrid:end   , 1:spcPoints:end       , 1,:) = color(1); % everything in between r
-    I(spcGrid:spcGrid:end   , 1:spcPoints:end       , 2,:) = color(2); % everything in between g
-    I(spcGrid:spcGrid:end   , 1:spcPoints:end       , 3,:) = color(3); % everything in between b
-    I(1:spcPoints:end       , 10:spcGrid:end        , 1,:) = color(1); 
-    I(1:spcPoints:end       , 10:spcGrid:end        , 2,:) = color(2);
-    I(1:spcPoints:end       , 10:spcGrid:end        , 3,:) = color(3); % TODO: there HAS to be a more elegant way to do this
+    I(1                     , spcP:spcP:end       , 1,:) = color(1); % first row r
+    I(1                     , spcP:spcP:end       , 2,:) = color(2); % first row g
+    I(1                     , spcP:spcP:end       , 3,:) = color(3); % first row b
+    I(spcP:spcP:end         , 1                   , 1,:) = color(1); % first column r
+    I(spcP:spcP:end         , 1                   , 2,:) = color(2); % first column g
+    I(spcP:spcP:end         , 1                   , 3,:) = color(3); % first column b
+    I(spcGrid:spcGrid:end   , spcP:spcP:end       , 1,:) = color(1); % everything in between r
+    I(spcGrid:spcGrid:end   , spcP:spcP:end       , 2,:) = color(2); % everything in between g
+    I(spcGrid:spcGrid:end   , spcP:spcP:end       , 3,:) = color(3); % everything in between b
+    I(spcP:spcP:end         , 10:spcGrid:end      , 1,:) = color(1); 
+    I(spcP:spcP:end         , 10:spcGrid:end      , 2,:) = color(2);
+    I(spcP:spcP:end         , 10:spcGrid:end      , 3,:) = color(3); % TODO: there HAS to be a more elegant way to do this
 end
 
 
