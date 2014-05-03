@@ -138,13 +138,11 @@ out_j_features = permute(out_j_features, [2,1,3]);
 % create dense correspondence fields one frame at a time
 for iterator = 1:n_frames
     tic
-    % TODO: create a grid to feed into this function instead
-    [ denseCorr, grid ] = thin_plate_denseCorrespondence(out_j_features(:, :, iterator), out_grid_all(:,:,:, iterator) );
-    %     denseCorr = thin_plate_denseCorrespondence(out_j_features(:, :, iterator), out_grid_all(:,:,:, iterator) );
-    out_denseCorr_all(:,:,:, iterator) = denseCorr;
-    out_grid_all(:,:,:, iterator) = grid;
+        fprintf([' - frame ' num2str(iterator) ' - ']);
+        [ denseCorr, grid ] = thin_plate_denseCorrespondence(out_j_features(:, :, iterator), out_grid_all(:,:,:, iterator) );
+        out_denseCorr_all(:,:,:, iterator) = denseCorr;
+        out_grid_all(:,:,:, iterator) = grid;
     % print time
-    fprintf([' - frame ' num2str(iterator) ' - ']);
     toc
 end
 
