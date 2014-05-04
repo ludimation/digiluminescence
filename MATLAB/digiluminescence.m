@@ -308,11 +308,11 @@ tic
 fprintf([' - images - ']);
     % save out images
     imwrite(tmp_data_C_all(:,:,:,1)                     ,[ 'test_01_Color.png'              ]);
-    imwrite(tmp_data_D_all(:,:,1)                       ,[ 'test_02_Depth.png'              ]);
+    imwrite(tmp_data_D_all(:,:,:,1)                     ,[ 'test_02_Depth.png'              ]);
     imwrite(tmp_output_cleanPlate                       ,[ 'test_02_Depth_cPlate.png'       ]);
-    imwrite(tmp_output_uMasks_all(:,:,1)                ,[ 'test_03_uMask.png'              ]);
+    imwrite(tmp_output_uMasks_all(:,:,:,1)              ,[ 'test_03_uMask.png'              ]);
     imwrite(tmp_output_denseCorr_all(:,:,:,1)           ,[ 'test_04_denseCorr.png'          ]);
-    imwrite(tmp_output_grid_all                         ,[ 'test_05_grid_warped.png'        ]);
+    imwrite(tmp_output_grid_all(:,:,:,1)                ,[ 'test_05_grid_warped.png'        ]);
     imwrite(tmp_output_masked_denseCorr_all(:,:,:,1)    ,[ 'test_06_denseCorr_masked.png'   ]);
     imwrite(tmp_output_digiLum_all(:,:,:,1)             ,[ 'test_06_digiLum.png'            ]);
 % print time 
