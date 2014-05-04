@@ -214,10 +214,10 @@ else
     toc
 end
 
-%% Draw debug joints and grid over warped grid
+%% Draw debug joints and reference grid over warped grid
 tic
 fprintf('----\n');
-fprintf('Drawing debug joints and grid \n');
+fprintf('Drawing debug joints and reference grid \n');
 
 % draw grid again sparser and blue to show where it started : drawGrid (I, spcGrid, spcPoints, color)
 output_grid_all = drawGrid(output_grid_all, 32, 4, [0 , ui8_max , ui8_max]); % cyan
