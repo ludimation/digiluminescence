@@ -150,11 +150,6 @@ output_j_features = [ j_endingFeatures; j_startingFeatures];
 %    positions to "tack" down the surrounding frame of the image so it
 %    doesn't warp around so much
 
-% draw joints in yellow: drawPoints(points, I, size, color)
-output_grid_all = drawPoints(j_startingFeatures, output_grid_all, 16, [ui8_max, ui8_max, 0] ); % yellow
-%TODO: draw limbs in white
-% drawLimbs(j_pos_all_projective, out_grid_all, 4, [ui8_max, ui8_max, 0] ); % yellow
-
 % cleanup
 clear j_pos_all_reshaped j_pos_all_reshaped_projective
 clear j_pos_all_x j_pos_all_y j_pos_all_z
@@ -163,8 +158,22 @@ clear j_pos_all_x_prjctd j_pos_all_y_prjctd j_pos_all_z_prjctd
 % print time
 toc
 
+%% Draw joints and limbs
+tic
+fprintf('----\n');
+fprintf('Drawing debug joints \n');
+
+% drawPoints(points, I, size, color)
+output_grid_all = drawPoints(j_startingFeatures, output_grid_all, 16, [ui8_max, ui8_max, 0] ); % yellow
+%TODO: draw limbs in white
+% drawLimbs(j_pos_all_projective, out_grid_all, 4, [ui8_max, ui8_max, 0] ); % yellow
+
+% print time
+toc
+
+
 %% Calculate dense correspondence fields frame by frame
-% tic
+tic
 fprintf('----\n');
 fprintf('Calculating dense correspondence fields frame by frame \n');
 
@@ -182,7 +191,15 @@ if data_calcDenseCorr
         % print time
         toc
     end
+else
+    % print time
+    toc
 end
+
+%% Draw debug joints and grid over warped grid
+tic
+fprintf('----\n');
+fprintf('Drawing debug joints and grid \n');
 
 % draw grid again sparser and blue to show where it started : drawGrid (I, spcGrid, spcPoints, color)
 output_grid_all = drawGrid(output_grid_all, 32, 4, [0 , ui8_max , ui8_max]); % cyan
@@ -196,7 +213,7 @@ clear j_pos_all_projective j_pos_all_projective2
 clear iterator denseCorr grid
 
 % print time
-% toc
+toc
 
 %% Create digiluminescence effect from dense correspondence fields
 tic
@@ -442,7 +459,6 @@ function [ I ] = drawPoints(p_array, I, sz_draw, c_rgb)
             I_tmp = circshift(I_px, [pos_x, pos_y]);
             inds = find(I_tmp>-1);
             I(inds) = I_tmp(inds);
-%             I = I + circshift(I_px, [pos_x, pos_y]);
         end
     end
 end
