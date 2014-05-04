@@ -22,11 +22,11 @@ fprintf('====\n');
 
 %% Run digiluminescence
 data_mask_thresh = 256;
-% data_calcDenseCorr = false;
-data_calcDenseCorr = true; %comment this line out to skip calculate dense correspondence
-data_n_framesToProcess = 30:31; % smallest test amount
-% data_n_framesToProcess = 30:35; % 5 frames
-% data_n_framesToProcess = 1:50;
+data_calcDenseCorr = false;
+data_calcDenseCorr = true; %comment this line out to skip dense correspondence caculcations
+data_n_framesToProcess = 31:32; % 2 frames = smallest test size
+% data_n_framesToProcess = 31:35; % 5 frames
+% data_n_framesToProcess = 31:80; % 50 frames
 % data_n_framesToProcess = 1:300;
 % data_n_framesToProcess = 1:length(data_timestamps); % Uncomment this line for full data processing, comment it out for smaller set above
 
@@ -38,6 +38,8 @@ data_n_framesToProcess = 30:31; % smallest test amount
         data_mask_thresh, ...
         data_calcDenseCorr ... 
     );
+
+% save digiluminescence_outputdata.mat output_*
 
 %% Test display
 % % TODO: add imshow to this figure
