@@ -1,3 +1,6 @@
+%% Clear previous output data
+clear n_framesToProcess ans output_*
+
 %% Load data
 tic
 fprintf('====\n');
