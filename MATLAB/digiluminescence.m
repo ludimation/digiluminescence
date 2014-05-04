@@ -52,13 +52,16 @@ output_uMasks_all       = zeros(    size(data_D_all)                    , 'int16
 output_denseCorr_all    = ones(     size(data_C_all)                    , 'int16'   ) * double(ui8_hlf);
 output_digiLum_all      = ones(     size(data_C_all)                    , 'uint8'   ) * double(ui8_hlf);
 output_grid_all         = zeros(    size(data_C_all)                    , 'uint8'   );
-grid_template           = zeros(    size(output_grid_all(:,:,:,1))      , 'uint8'   );
 output_C_all            = zeros(    size(data_C_all)                    , 'uint8'   );
 output_masked_denseCorr_all     =           output_denseCorr_all                            ;
 
-% Draw grids : drawGrid (I, spcGrid, spcPoints, color)
-grid_template   = drawGrid(grid_template    , 32, 2, [ui8_max, ui8_max, 0]); % yellow
-output_grid_all    = drawGrid(output_grid_all     , 32, 1, [ui8_max, ui8_max, 0]); % yellow
+%% Draw grids
+tic
+fprintf('----\n');
+fprintf('Drawing grids \n');
+
+% drawGrid (I, spcGrid, spcPoints, color)
+output_grid_all     = drawGrid(output_grid_all     , 32, 1, [ui8_max, ui8_max, 0]); % yellow
 
 % print time
 toc
@@ -270,7 +273,6 @@ tmp_output_denseCorr_all = (double(output_denseCorr_all) - dc_offset) * dc_scale
 tmp_output_masked_denseCorr_all = (double(output_masked_denseCorr_all) - dc_offset) * dc_scale + dc_offset;
 % in grid images
 imwrite( data_C_all(:,:,:,1)                                    ,[ 'test_01_Color.png'              ]);
-imwrite(uint8( grid_template(:,:,:) )                           ,[ 'test_05_grid_template.png'      ]);
 imwrite(uint8( output_grid_all(:,:,:,1) )                       ,[ 'test_05_grid_warped.png'        ]);
 imwrite(uint8( output_digiLum_all(:,:,:,1) )                    ,[ 'test_06_digiLum.png'            ]);
 imwrite(uint8( data_D_all(:,:,1)                / i16_2_ui8 )           ,[ 'test_02_Depth.png'              ]);
