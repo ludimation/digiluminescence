@@ -85,7 +85,7 @@ D_all_clean(inds_positive) = D_all(inds_positive);
 % calculate masks for areas with large differences between the clean Depth
 % image and the cleanPlate
 D_all_diff              = abs(D_all_clean - D_all_cPlate);
-inds_BG                 = find(abs(D_all_clean - D_all_cPlate) < 1024); %TODO: Make this threshold user-specifiable
+inds_BG                 = abs(D_all_diff) < 1024; %TODO: Make this threshold user-specifiable
 out_uMasks_all          = D_all_clean;
 out_uMasks_all(inds_BG) = -8;
 
@@ -343,7 +343,7 @@ function [ I ] = drawPoints(p_array, I, sz_draw, c_rgb)
     narginMax = 4;
     narginchk(narginMin, narginMax);
     if nargin < 3
-        p_size = 8;
+        sz_draw = 8;
     end
     if nargin < 4
         c_rgb = white(1) * intmax('int16');

@@ -95,7 +95,7 @@ zz = reshape(x_ins-x_is,2,numel(x_ins-x_is)/2);
 r_i = reshape(sqrt(sum(zz.*zz)),n_feats,n_pix_inputs);
 % since log of 1 is zero we can add 1s to the zero entries of r_i matrix to
 % prevent taking log of zero
-r_i(find(r_i==0)) = 1; 
+r_i(r_i==0) = 1; 
 
 % compute phi_dc for dense correspondence formula
 phi_dc = (r_i.^2).*(log(r_i));
