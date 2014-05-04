@@ -1,10 +1,20 @@
+fprintf('====\n');
+fprintf('Demo :: executing \n');
+
+
 %% Clear previous output data
-clear n_framesToProcess ans output_*
+% tic
+% fprintf('----\n');
+% fprintf('Clearing previous output data \n');
+% clear n_framesToProcess ans output_*
+% 
+% % print time
+% toc
 
 %% Load data
 tic
-fprintf('====\n');
-fprintf('Demo :: Loading kinect data \n');
+fprintf('----\n');
+fprintf('Loading kinect data \n');
 
 % Only load data if the data has not yet been loaded
 if (...
@@ -18,9 +28,12 @@ end
 
 % print time
 toc
-fprintf('====\n');
 
-%% Run digiluminescence
+%% Set parameters
+tic
+fprintf('----\n');
+fprintf('Setting digiluminescence parameters \n');
+
 data_mask_thresh = 256
 data_calcDenseCorr = false;
 data_calcDenseCorr = true; %comment this line out to skip dense correspondence caculcations
@@ -29,6 +42,14 @@ data_n_framesToProcess = 31:32; % 2 frames = smallest test size
 % data_n_framesToProcess = 31:80; % 50 frames
 % data_n_framesToProcess = 1:300;
 % data_n_framesToProcess = 1:length(data_timestamps); % Uncomment this line for full data processing, comment it out for smaller set above
+
+% print time
+toc
+
+%% Call digiluminescence
+tic
+fprintf('----\n');
+fprintf('Calling digiluminescence \n');
 
 % TODO: 
 %    - feed dense correspondences (if any) into this equation
@@ -42,10 +63,25 @@ data_n_framesToProcess = 31:32; % 2 frames = smallest test size
         data_calcDenseCorr ... 
     );
 
+% print time
+toc
+
+%% Save output data
+tic
+fprintf('----\n');
+fprintf('Saving output data \n');
+
 % TODO: time-stamp and date this file
 save digiluminescence_outputdata.mat output_*
 
-%% Test display
+% print time
+toc
+
+%% Set up results display figure
+% tic
+% fprintf('----\n');
+% fprintf('Setting up results display figure \n');
+%
 % % TODO: add imshow to this figure
 % 
 % figure(1);
@@ -53,7 +89,14 @@ save digiluminescence_outputdata.mat output_*
 % axis equal;
 % axis([-2 2 -2 2 1 3]);
 % 
-%%
+% % print time
+% toc
+
+%% Display results
+% tic
+% fprintf('----\n');
+% fprintf('Displaying results \n');
+%
 % % TODO: update image being shown as well
 % for k=1:length(timestamps)
 %     set(h_p,'XData',joint_positions_all(:,1,k), ...
@@ -62,3 +105,12 @@ save digiluminescence_outputdata.mat output_*
 %     pause(0.01);
 %         drawnow;
 % end
+% 
+% % print time
+% toc
+
+%% Report timestamp
+fprintf('====\n');
+fprintf('Demo :: End\n'); 
+%TODO: figure out a way to print all elapsed time for this function
+fprintf('====\n');
