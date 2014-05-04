@@ -294,8 +294,8 @@ fprintf([' - reformatting data - ']);
         dc_scale = double(2^0);
     end
     dc_offset = double(0); % ui8_hlf;
-    tmp_output_denseCorr_all = (double(tmp_output_denseCorr_all) - dc_offset) * dc_scale + dc_offset;
-    tmp_output_masked_denseCorr_all = (double(tmp_output_masked_denseCorr_all) - dc_offset) * dc_scale + dc_offset;
+    tmp_output_denseCorr_all        = uint8((double(tmp_output_denseCorr_all        ) - dc_offset) * dc_scale + dc_offset);
+    tmp_output_masked_denseCorr_all = uint8((double(tmp_output_masked_denseCorr_all ) - dc_offset) * dc_scale + dc_offset);
     %clean up
     clear dc_*
 % print time
