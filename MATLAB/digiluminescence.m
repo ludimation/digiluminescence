@@ -257,6 +257,9 @@ end
 % Draw colored lines along vectors of the field into the digiluminescence
 % effect output
 
+% clean up
+clear iteration*
+
 % print time
 toc
 
@@ -282,6 +285,8 @@ end
 dc_offset = double(0); % ui8_hlf;
 tmp_output_denseCorr_all = (double(output_denseCorr_all) - dc_offset) * dc_scale + dc_offset;
 tmp_output_masked_denseCorr_all = (double(output_masked_denseCorr_all) - dc_offset) * dc_scale + dc_offset;
+%clean up
+clear dc_*
 % in grid images
 imwrite( data_C_all(:,:,:,1)                                            ,[ 'test_01_Color.png'              ]);
 imwrite(uint8( data_D_all(:,:,1)                / i16_2_ui8 )           ,[ 'test_02_Depth.png'              ]);
@@ -384,7 +389,6 @@ close(writerObj);
 toc
 
 % clean up memory
-clear C_all D_all joint_positions_all timestamps writerObj
 clear writerObj tmp_*
 
 
