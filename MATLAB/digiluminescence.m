@@ -328,9 +328,9 @@ function [ I ] = drawGrid (I, spcGrid, spcP, color)
     I(spcGrid:spcGrid:end   , spcP:spcP:end       , 1,:) = color(1); % everything in between r
     I(spcGrid:spcGrid:end   , spcP:spcP:end       , 2,:) = color(2); % everything in between g
     I(spcGrid:spcGrid:end   , spcP:spcP:end       , 3,:) = color(3); % everything in between b
-    I(spcP:spcP:end         , 10:spcGrid:end      , 1,:) = color(1); 
-    I(spcP:spcP:end         , 10:spcGrid:end      , 2,:) = color(2);
-    I(spcP:spcP:end         , 10:spcGrid:end      , 3,:) = color(3); % TODO: there HAS to be a more elegant way to do this
+    I(spcP:spcP:end         , spcGrid:spcGrid:end , 1,:) = color(1); 
+    I(spcP:spcP:end         , spcGrid:spcGrid:end , 2,:) = color(2);
+    I(spcP:spcP:end         , spcGrid:spcGrid:end , 3,:) = color(3); % TODO: there HAS to be a more elegant way to do this
 end
 
 %% DRAWPOINTS method
