@@ -268,56 +268,59 @@ toc
 fprintf('----\n');
 fprintf('Saving out some test files \n');
 
+% reformat data
+tic
+fprintf([' - reformatting data - ']);
+    % IMG data must be of one of the following classes: double, single, uint8
+    tmp_data_C_all                  = uint8(data_C_all                              )               ;
+    tmp_data_D_all                  = uint8(data_D_all              / i16_2_ui8     )               ;
+    tmp_output_cleanPlate           = uint8(output_cleanPlate       / i16_2_ui8     )               ;
+    tmp_output_uMasks_all           = uint8(output_uMasks_all       / i16_2_ui8     )               ;
+    tmp_output_denseCorr_all        = uint8(output_denseCorr_all                    )   + ui8_hlf   ;
+    tmp_output_grid_all             = uint8(output_grid_all                         )               ;
+    tmp_output_masked_denseCorr_all = uint8(output_masked_denseCorr_all             )   + ui8_hlf   ;
+    tmp_output_digiLum_all          = uint8(output_digiLum_all                      )               ;
+    % must have a [w,h,bitDepth, frames] array for video file writing
+    tmp_data_D_all = permute(tmp_data_D_all, [1,2,4,3]);
+    tmp_output_uMasks_all = permute(tmp_output_uMasks_all, [1,2,4,3]);
+    % scale dense correspondence for visibility
+    if data_calcDenseCorr
+        % turn up coefficient to increase visualcontrast in dense
+        % correspondence data
+        dc_scale = double(2^3); 
+    else
+        % if dense correspondence data is not being generated, it is already
+        % maximal by default, so you don't need to scale it
+        dc_scale = double(2^0);
+    end
+    dc_offset = double(0); % ui8_hlf;
+    tmp_output_denseCorr_all = (double(tmp_output_denseCorr_all) - dc_offset) * dc_scale + dc_offset;
+    tmp_output_masked_denseCorr_all = (double(tmp_output_masked_denseCorr_all) - dc_offset) * dc_scale + dc_offset;
+    %clean up
+    clear dc_*
+% print time
+toc
+
 %%%%%%%%%%%%
 % images
 %%%%%%%%%%%%
 tic
 fprintf([' - images - ']);
-% scale dense correspondence
-if data_calcDenseCorr
-    % turn up coefficient to increase visualcontrast in dense
-    % correspondence data
-    dc_scale = double(2^3); 
-else
-    % if dense correspondence data is not being generated, it is already
-    % maximal by default, so you don't need to scale it
-    dc_scale = double(2^0);
-end
-dc_offset = double(0); % ui8_hlf;
-tmp_output_denseCorr_all = (double(output_denseCorr_all) - dc_offset) * dc_scale + dc_offset;
-tmp_output_masked_denseCorr_all = (double(output_masked_denseCorr_all) - dc_offset) * dc_scale + dc_offset;
-%clean up
-clear dc_*
-% in grid images
-imwrite( data_C_all(:,:,:,1)                                            ,[ 'test_01_Color.png'              ]);
-imwrite(uint8( data_D_all(:,:,1)                / i16_2_ui8 )           ,[ 'test_02_Depth.png'              ]);
-imwrite(uint8( output_cleanPlate                / i16_2_ui8 )           ,[ 'test_02_Depth_cPlate.png'       ]);
-imwrite(uint8( output_uMasks_all(:,:,1)         / i16_2_ui8 )           ,[ 'test_03_uMask.png'              ]);
-imwrite(uint8( tmp_output_denseCorr_all(:,:,:,1) )  + ui8_hlf           ,[ 'test_04_denseCorr.png'          ]);
-imwrite(uint8( output_grid_all(:,:,:,1) )                               ,[ 'test_05_grid_warped.png'        ]);
-imwrite(uint8( tmp_output_masked_denseCorr_all(:,:,:,1) )  + ui8_hlf    ,[ 'test_06_denseCorr_masked.png'   ]);
-imwrite(uint8( output_digiLum_all(:,:,:,1) )                            ,[ 'test_06_digiLum.png'            ]);
+    % save out images
+    imwrite(tmp_data_C_all(:,:,:,1)                     ,[ 'test_01_Color.png'              ]);
+    imwrite(tmp_data_D_all(:,:,1)                       ,[ 'test_02_Depth.png'              ]);
+    imwrite(tmp_output_cleanPlate                       ,[ 'test_02_Depth_cPlate.png'       ]);
+    imwrite(tmp_output_uMasks_all(:,:,1)                ,[ 'test_03_uMask.png'              ]);
+    imwrite(tmp_output_denseCorr_all(:,:,:,1)           ,[ 'test_04_denseCorr.png'          ]);
+    imwrite(tmp_output_grid_all                         ,[ 'test_05_grid_warped.png'        ]);
+    imwrite(tmp_output_masked_denseCorr_all(:,:,:,1)    ,[ 'test_06_denseCorr_masked.png'   ]);
+    imwrite(tmp_output_digiLum_all(:,:,:,1)             ,[ 'test_06_digiLum.png'            ]);
 % print time 
 toc
 
 %%%%%%%%%%%%
 % videos
 %%%%%%%%%%%%
-tic
-fprintf([' - videos - reformatting data - ']);
-% must have a [w,h,bitDepth, frames] array for video file writing
-tmp_data_D_all = permute(data_D_all, [1,2,4,3]);
-tmp_output_uMasks_all = permute(output_uMasks_all, [1,2,4,3]);
-% IMG must be of one of the following classes: double, single, uint8
-tmp_data_C_all                  = uint8(data_C_all                              )               ;
-tmp_data_D_all                  = uint8(tmp_data_D_all          / i16_2_ui8     )               ;
-tmp_output_uMasks_all           = uint8(tmp_output_uMasks_all   / i16_2_ui8     )               ;
-tmp_output_denseCorr_all        = uint8(tmp_output_denseCorr_all                )   + ui8_hlf   ;
-tmp_output_grid_all             = uint8(output_grid_all                         )               ;
-tmp_output_masked_denseCorr_all = uint8(tmp_output_masked_denseCorr_all         )   + ui8_hlf   ;
-tmp_output_digiLum_all          = uint8(output_digiLum_all                      )               ;
-% print time
-toc
 
 % data_C_all
 tic
