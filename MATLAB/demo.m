@@ -21,7 +21,7 @@ toc
 fprintf('====\n');
 
 %% Run digiluminescence
-data_mask_thresh = 256;
+data_mask_thresh = 256
 data_calcDenseCorr = false;
 data_calcDenseCorr = true; %comment this line out to skip dense correspondence caculcations
 data_n_framesToProcess = 31:32; % 2 frames = smallest test size
@@ -30,6 +30,9 @@ data_n_framesToProcess = 31:32; % 2 frames = smallest test size
 % data_n_framesToProcess = 1:300;
 % data_n_framesToProcess = 1:length(data_timestamps); % Uncomment this line for full data processing, comment it out for smaller set above
 
+% TODO: 
+%    - feed dense correspondences (if any) into this equation
+%    - break down effect into more manageable function call chunks
 [ output_C_all, output_cleanPlate, output_uMasks_all, output_j_features, output_denseCorr_all, output_digiLum_all, output_grid_all ] = digiluminescence( ...
         data_C_all(:,:,:, data_n_framesToProcess), ...
         data_D_all(:,:, data_n_framesToProcess), ...
@@ -39,7 +42,8 @@ data_n_framesToProcess = 31:32; % 2 frames = smallest test size
         data_calcDenseCorr ... 
     );
 
-% save digiluminescence_outputdata.mat output_*
+% TODO: time-stamp and date this file
+save digiluminescence_outputdata.mat output_*
 
 %% Test display
 % % TODO: add imshow to this figure
