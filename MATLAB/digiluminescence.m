@@ -35,17 +35,22 @@ fprintf('Initializing variables \n');
 
 out_D_cPlate       	= zeros(    size(D_all(:,:,1))          , 'int16'   );
 out_uMasks_all      = zeros(    size(D_all)                 , 'int16'   );
-out_denseCorr_all   = zeros(    size(C_all)                 , 'int8'    );
-out_grid_all        = zeros(    size(C_all)                 , 'int8'    );
-grid_template       = zeros(    size(out_grid_all(:,:,:,1)) , 'int8'    );
-out_dl_all          = zeros(    size(C_all)                 , 'int8'    );
+out_denseCorr_all   = zeros(    size(C_all)                 , 'uint8'   );
+out_grid_all        = zeros(    size(C_all)                 , 'uint8'   );
+grid_template       = zeros(    size(out_grid_all(:,:,:,1)) , 'uint8'   );
+out_dl_all          = zeros(    size(C_all)                 , 'uint8'   );
 
 n_joints            = size(     joint_positions_all         , 1         );
 n_frames            = length(   timestamps                              );
 
+ui8_max = intmax('uint8');
+ui8_hlf = round(intmax('uint8')/2);
+i16_max = intmax('int16');
+u16_2_ui8 = 2^7;
+
 % Draw grids : drawGrid (I, spcGrid, spcPoints, color)
-grid_template   = drawGrid(grid_template    , 32, 2, [2^8, 2^8, 0]); % yellow
-out_grid_all    = drawGrid(out_grid_all     , 32, 1, [2^8, 2^8, 0]); % yellow
+grid_template   = drawGrid(grid_template    , 32, 2, [ui8_max, ui8_max, 0]); % yellow
+out_grid_all    = drawGrid(out_grid_all     , 32, 1, [ui8_max, ui8_max, 0]); % yellow
 
 % print time
 toc
@@ -139,9 +144,9 @@ out_j_features = [ j_endingFeatures; j_startingFeatures];
 %    doesn't warp around so much
 
 % draw joints in yellow: drawPoints(points, I, size, color)
-out_grid_all = drawPoints(j_startingFeatures, out_grid_all, 16, [2^8, 2^8, 0] ); % yellow
+out_grid_all = drawPoints(j_startingFeatures, out_grid_all, 16, [ui8_max, ui8_max, 0] ); % yellow
 %TODO: draw limbs in white
-% drawLimbs(j_pos_all_projective, out_grid_all, 4, [2^8, 2^8, 0] ); % yellow
+% drawLimbs(j_pos_all_projective, out_grid_all, 4, [ui8_max, ui8_max, 0] ); % yellow
 
 % cleanup
 clear j_pos_all_reshaped j_pos_all_reshaped_projective
@@ -170,11 +175,11 @@ if calcDenseCorr
 end
 
 % draw grid again sparser and blue to show where it started : drawGrid (I, spcGrid, spcPoints, color)
-out_grid_all = drawGrid(out_grid_all, 32, 4, [0 , 2^8 , 2^8]); % cyan
+out_grid_all = drawGrid(out_grid_all, 32, 4, [0 , ui8_max , ui8_max]); % cyan
 % draw ending joints in magenta (small radius -- warped joints will appear as large yellow dots)
-out_grid_all = drawPoints(j_endingFeatures      , out_grid_all, 8, [2^8 , 0   , 2^8] ); % magenta
+out_grid_all = drawPoints(j_endingFeatures      , out_grid_all, 8, [ui8_max , 0         , ui8_max] ); % magenta
 % draw starting joints in blue (smaller radius)
-out_grid_all = drawPoints(j_startingFeatures    , out_grid_all, 6, [0   , 2^8 , 2^8] ); % cyan
+out_grid_all = drawPoints(j_startingFeatures    , out_grid_all, 6, [0       , ui8_max   , ui8_max] ); % cyan
 
 % cleanup
 clear j_pos_all_projective j_pos_all_projective2
@@ -208,13 +213,13 @@ tic
 fprintf([' - images - ']);
 % TODO: include drawings of old, new, and warped positions of joints/limbs
 % in grid images
-imwrite( C_all(:,:,:,1)                             ,[ 'test_01_Color.png'          ]);
-imwrite(uint8( D_all(:,:,1)                 / 2^8 ) ,[ 'test_02_Depth.png'          ]);
-imwrite(uint8( out_D_cPlate                 / 2^8 ) ,[ 'test_02_Depth_cPlate.png'   ]);
-imwrite(uint8( out_uMasks_all(:,:,1)        / 2^8 ) ,[ 'test_03_uMask.png'          ]);
-imwrite(uint8( out_denseCorr_all(:,:,:,1) )         ,[ 'test_04_denseCorr.png'      ]);
-imwrite(uint8( grid_template(:,:,:) )               ,[ 'test_05_grid_template.png'  ]);
-imwrite(uint8( out_grid_all(:,:,:,1) )              ,[ 'test_05_grid_warped.png'    ]);
+imwrite( C_all(:,:,:,1)                                     ,[ 'test_01_Color.png'          ]);
+imwrite(uint8( D_all(:,:,1)                 / u16_2_ui8 )   ,[ 'test_02_Depth.png'          ]);
+imwrite(uint8( out_D_cPlate                 / u16_2_ui8 )   ,[ 'test_02_Depth_cPlate.png'   ]);
+imwrite(uint8( out_uMasks_all(:,:,1)        / u16_2_ui8 )   ,[ 'test_03_uMask.png'          ]);
+imwrite(uint8( out_denseCorr_all(:,:,:,1) )                 ,[ 'test_04_denseCorr.png'      ]);
+imwrite(uint8( grid_template(:,:,:) )                       ,[ 'test_05_grid_template.png'  ]);
+imwrite(uint8( out_grid_all(:,:,:,1) )                      ,[ 'test_05_grid_warped.png'    ]);
 % print time
 toc
 
@@ -227,11 +232,11 @@ fprintf([' - videos - reformatting data - ']);
 D_all = permute(D_all, [1,2,4,3]);
 out_uMasks_all = permute(out_uMasks_all, [1,2,4,3]);
 % IMG must be of one of the following classes: double, single, uint8
-C_all                   = uint8(C_all                       );
-D_all                   = uint8(D_all               / 2^8   );
-out_uMasks_all          = uint8(out_uMasks_all      / 2^8   );
-out_denseCorr_all       = uint8(out_denseCorr_all           );
-out_grid_all            = uint8(out_grid_all                );
+C_all                   = uint8(C_all                               );
+D_all                   = uint8(D_all               / u16_2_ui8     );
+out_uMasks_all          = uint8(out_uMasks_all      / u16_2_ui8     );
+out_denseCorr_all       = uint8(out_denseCorr_all                   );
+out_grid_all            = uint8(out_grid_all                        );
 % print time
 toc
 
@@ -305,9 +310,9 @@ function [ I ] = drawGrid (I, spcGrid, spcP, color)
         spcP = 1;
     end
     if nargin < 4
-        color = white(1) * 2^8;
+        color = white(1) * ui8_max;
     end
-    
+   
     I(1                     , spcP:spcP:end       , 1,:) = color(1); % first row r
     I(1                     , spcP:spcP:end       , 2,:) = color(2); % first row g
     I(1                     , spcP:spcP:end       , 3,:) = color(3); % first row b
@@ -335,11 +340,11 @@ function [ I ] = drawPoints(p_array, I, sz_draw, c_rgb)
         p_size = 8;
     end
     if nargin < 4
-        c_rgb = white(1) * 2^8;
+        c_rgb = white(1) * intmax('int16');
     end
     
     sz_I = size(I);
-    I_px = -ones(sz_I, 'int8');
+    I_px = -ones(sz_I, 'int16');
     % indeces must be rounded doubles / integers %TODO: might also want to
     % check values to make sure none of them are 0, nor max width and
     % height of I

@@ -104,11 +104,11 @@ phi_dc = (r_i.^2).*(log(r_i));
 x_interps = out_w'*phi_dc + out_a'*pix_inputs + repmat(out_b',1,n_pix_inputs);
 
 % reshape dense correspondence field into x, y, and (TODO:) z vectors
-out_denseCorrespondence = zeros(im_sz,'int8');
-out_denseCorrespondence(:,:,1) = reshape((x_interps(1,:) - xx'), im_sz_wh(1),im_sz_wh(2));
-out_denseCorrespondence(:,:,2) = reshape((x_interps(2,:) - yy'), im_sz_wh(1),im_sz_wh(2));
-% out_denseCorrespondence(:,:,3) = 2^8; % TODO: temporarily storing 100% in this channel, but should eventually include z in dense correspondence calculations
-out_denseCorrespondence(:,:,3) = int8(2^8-1); % TODO: temporarily storing 100% in this channel, but should eventually include z in dense correspondence calculations
+out_denseCorrespondence = zeros(im_sz,'uint8');
+ui8_max = intmax('uint8');
+out_denseCorrespondence(:,:,1) = int16(ui8_max/2) + int16(reshape((x_interps(1,:) - xx'), im_sz_wh(1),im_sz_wh(2)));
+out_denseCorrespondence(:,:,2) = int16(ui8_max/2) + int16(reshape((x_interps(2,:) - yy'), im_sz_wh(1),im_sz_wh(2)));
+out_denseCorrespondence(:,:,3) = int16(ui8_max/2); % TODO: temporarily storing 50% in this channel, but should eventually include z in dense correspondence calculations
 
 if ~no_out_I_interp
     vr = reshape(in_I(:,:,1),n_pix_inputs,1);
