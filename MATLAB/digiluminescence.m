@@ -166,7 +166,10 @@ if calcDenseCorr
     for iterator = 1:n_frames
         tic
             fprintf([' - frame ' num2str(iterator) ' - ']);
-            [ denseCorr, grid ] = thin_plate_denseCorrespondence(out_j_features(:, :, iterator), out_grid_all(:,:,:, iterator) );
+            [ denseCorr, grid ] = thin_plate_denseCorrespondence(...
+                out_j_features(:, :, iterator), ...
+                out_grid_all(:,:,:, iterator) ...
+            );
             out_denseCorr_all(:,:,:, iterator) = denseCorr;
             out_grid_all(:,:,:, iterator) = grid;
         % print time
@@ -392,86 +395,3 @@ function [ I ] = drawPoints(p_array, I, sz_draw, c_rgb)
         end
     end
 end
-
-
-function [ I ] = drawCircles(points, I, radius, color)
-% TODO: 
-%     this is just stub code grabbed from -
-%     http://matlab.wikia.com/wiki/FAQ, still needs to be written and
-%     tested properly
-
-    % Create a logical image of a circle with specified
-    % diameter, center, and image size.
-    % First create the image.
-    imageSizeX = 640;
-    imageSizeY = 480;
-    [columnsInImage rowsInImage] = meshgrid(1:imageSizeX, 1:imageSizeY);
-    % Next create the circle in the image.
-    centerX = 320;
-    centerY = 240;
-    radius = 100;
-    circlePixels = (rowsInImage - centerY).^2 ...
-        + (columnsInImage - centerX).^2 <= radius.^2;
-    % circlePixels is a 2D "logical" array.
-    % Now, display it.
-    image(circlePixels) ;
-    colormap([0 0 0; 1 1 1]);
-    title('Binary image of a circle');
-
-    % If you want, this circle mask can be used to assign image values
-    % either inside or outside the circle to a new gray level:
-
-    % Assign values inside the circle.
-    newGrayLevelInside = 50;
-    grayImage(circlePixels) = newGrayLevelInside;
-
-    % Or, assign values outside the circle.
-    newGrayLevelOutside = 150;
-    grayImage(~circlePixels) = newGrayLevelOutside ;
-end
-
-%% Load images
-% % TODO: Generalize this into a GUI that allows you to select images
-% 
-% % Check dimensions of all images to make sure they match, as well as bit
-% % depth of S0 & T0 to make sure they match
-% if size(S0,1) ~= w | size(S0,2) ~= h | size(S0,3) ~= chan | size(m,1) ~= w | size(m,2) ~= h 
-%     % Throw error and return from function
-%     fprintf('====\n'); 
-%     fprintf('Error - Poisson_dallen2ndAttempt:\n'); 
-%     fprintf('--\n'); 
-%     fprintf('source, target, and mask image dimensions must match,\n'); 
-%     fprintf('and source, target must have same number of channels\n'); 
-%     fprintf(' - Target is %d x %d x %d\n', size(T0,1), size(T0,2), size(T0,3)); 
-%     fprintf(' - Source is %d x %d x %d\n', size(S0,1), size(S0,2), size(S0,3)); 
-%     fprintf(' - Mask is %d x %d x %d\n', size(m,1), size(m,2), size(m,3));
-%     fprintf('====\n'); 
-%     return;
-% end
-% 
-% %% Save
-% % Debugging images
-% if false % These never execute
-%     imwrite(uint8( M0*255   ),[ iFileName '-M0.png'         ]);
-%     imwrite(uint8( Lt       ),[ iFileName '-Lt.png'         ]);
-%     imwrite(uint8( Ls       ),[ iFileName '-Ls.png'         ]);
-%     imwrite(uint8( LtAmp    ),[ iFileName '-LtAmp.png'      ]);
-%     imwrite(uint8( LsAmp    ),[ iFileName '-LsAmp.png'      ]);
-%     imwrite(uint8( LgVF*255 ),[ iFileName '-LgVF.png'       ]);
-%     imwrite(uint8( Lgm*255  ),[ iFileName '-Lgm.png'        ]);
-% end
-% 
-% % Move into debugging if statement as they begin working as expected
-% imwrite(uint8( L0       ),[ iFileName '-L0.png'         ]);
-% 
-% % Save final image
-% imwrite(uint8( I0        ),[ iFileName '.png'        ]);
-% 
-% 
-% %% Cleanup Variables (some of these could be cleared earlier to save memory)
-% clear iFileName nonC iterations dimReturnsThreshold verbose
-% clear w h chan 
-% clear S0 M0 T0 K Lt Ls LtAmp LsAmp LgVF Lgm Lm L0 I0
-% 
-% end
-
