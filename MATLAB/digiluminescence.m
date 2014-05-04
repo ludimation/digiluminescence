@@ -374,6 +374,10 @@ function [ I ] = drawPoints(p_array, I, sz_draw, c_rgb)
     b_array = ones(sz_x_array, 'double')     *3         ; 
     frame_array = double(reshape(repmat(1:p_frames, [p_w,1,1]), sz_x_array));
 
+    % clamp x and y arrays at 0 to height & width of image
+    x_array = max(min(x_array,size(I, 1)),1);
+    y_array = max(min(y_array,size(I, 2)),1);
+     
     % create one array for each channel that contains the indexes of the
     % pixels to be colored
     point_indexes_r = sub2ind(sz_I, x_array, y_array, r_array, frame_array);
