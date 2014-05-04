@@ -2,7 +2,7 @@ function [ output_C_all, output_cleanPlate, output_uMasks_all, output_j_features
     digiluminescence(data_C_all, data_D_all, data_joint_positions_all, data_timestamps, data_mask_thresh, data_calcDenseCorr )
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
-% TODO: 
+% TODO: Later 
 %     - Generalize this into a GUI that allows user to select data? 
 %     - Check formatting of all inputs to make sure this executes properly
 %     - Check number of inputs / outputs [nargoutchk/narginchk(minargs,
