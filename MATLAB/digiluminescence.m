@@ -79,6 +79,7 @@ output_cleanPlate               = zeros(    size(data_D_all(:,:,1))             
 output_uMasks_all               = zeros(    size(data_D_all)                    , 'int16'   );
 output_denseCorr_all            = ones(     size(data_C_all)                    , 'int16'   ) * double(ui8_hlf);
 output_denseCorr_masked_all     =           output_denseCorr_all                            ;
+output_denseCorr_multiframe_all =           output_denseCorr_all                            ;
 output_digiLum_all              = ones(     size(data_C_all)                    , 'uint8'   ) * double(ui8_hlf);
 output_grid_all                 = zeros(    size(data_C_all)                    , 'uint8'   );
 
@@ -282,11 +283,14 @@ output_denseCorr_masked_all = uint8( ...
 iteration_max = 16;
 for iteration = 1:iteration_max
     % circshift iteration-1 so it starts with current frame
-    output_digiLum_all = output_digiLum_all ...
+    output_denseCorr_multiframe_all = output_denseCorr_multiframe_all ...
         + circshift(output_denseCorr_masked_all, [1,1,1,iteration - 1] ) ...
         * (-((iteration-1)/iteration_max)+1)^(1/2) ... y = sqrt(-x+1) easing
         ;
 end
+
+% TODO: draw lines from 'output_denseCorr_multiframe_all' into 'output_digiLum_all'
+output_digiLum_all = output_denseCorr_multiframe_all;
 
 % Draw colored lines along vectors of the field into the digiluminescence
 % effect output
