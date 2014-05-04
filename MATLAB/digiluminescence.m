@@ -317,6 +317,7 @@ fprintf([' - reformatting data - ']);
     tmp_output_grid_all             = uint8(output_grid_all                         )               ;
     tmp_output_denseCorr_masked_all = uint8(output_denseCorr_masked_all             )   + ui8_hlf   ;
     tmp_output_digiLum_all          = uint8(output_digiLum_all                      )               ;
+    tmp_output_denseCorr_multiframe_all = uint8(output_denseCorr_multiframe_all         )   + ui8_hlf   ;
     % must have a [w,h,bitDepth, frames] array for video file writing
     tmp_data_D_all = permute(tmp_data_D_all, [1,2,4,3]);
     tmp_output_uMasks_all = permute(tmp_output_uMasks_all, [1,2,4,3]);
@@ -333,6 +334,7 @@ fprintf([' - reformatting data - ']);
     dc_offset = ui8_hlf; % double(0); % 
     tmp_output_denseCorr_all        = uint8((double(tmp_output_denseCorr_all        ) - dc_offset) * dc_scale + dc_offset);
     tmp_output_denseCorr_masked_all = uint8((double(tmp_output_denseCorr_masked_all ) - dc_offset) * dc_scale + dc_offset);
+    tmp_output_denseCorr_multiframe_all = uint8((double(tmp_output_denseCorr_multiframe_all ) - dc_offset) * dc_scale + dc_offset);
     %clean up
     clear dc_*
 % print time
@@ -352,6 +354,7 @@ fprintf([' - images - ']);
     imwrite(tmp_output_grid_all(:,:,:,1)                ,[ 'test_05_grid_warped.png'        ]);
     imwrite(tmp_output_denseCorr_masked_all(:,:,:,1)    ,[ 'test_06_denseCorr_masked.png'   ]);
     imwrite(tmp_output_digiLum_all(:,:,:,1)             ,[ 'test_06_digiLum.png'            ]);
+    imwrite(tmp_output_denseCorr_multiframe_all(:,:,:,1),[ 'test_06_denseCorr_multiframe.png'   ]);
 % print time 
 toc
 
@@ -415,6 +418,16 @@ fprintf([' - videos - output_denseCorr_masked_all - ']);
     writerObj = VideoWriter(['test_06_denseCorr_masked.mp4'], 'MPEG-4');
     open(writerObj);
     writeVideo(writerObj,tmp_output_denseCorr_masked_all)
+    close(writerObj);
+% print time
+toc
+
+% output_denseCorr_multiframe_all
+tic
+fprintf([' - videos - output_denseCorr_multiframe_all - ']);
+    writerObj = VideoWriter(['test_06_denseCorr_multiframe.mp4'], 'MPEG-4');
+    open(writerObj);
+    writeVideo(writerObj,tmp_output_denseCorr_multiframe_all)
     close(writerObj);
 % print time
 toc
