@@ -1,4 +1,4 @@
-function [ output_C_all, output_cleanPlate, output_uMasks_all, output_j_features, output_denseCorr_all, output_digiLum_all, output_grid_all ] = ...
+function [ output_C_all, output_cleanPlate, output_uMasks_all, output_j_features, output_denseCorr_all, output_digiLum_all, output_grid_all, output_masked_denseCorr_all ] = ...
     digiluminescence(data_C_all, data_D_all, data_joint_positions_all, data_timestamps, data_mask_thresh, data_calcDenseCorr )
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
@@ -54,6 +54,7 @@ output_digiLum_all      = ones(     size(data_C_all)                    , 'uint8
 output_grid_all         = zeros(    size(data_C_all)                    , 'uint8'   );
 grid_template           = zeros(    size(output_grid_all(:,:,:,1))      , 'uint8'   );
 output_C_all            = zeros(    size(data_C_all)                    , 'uint8'   );
+output_masked_denseCorr_all     =           output_denseCorr_all                            ;
 
 % Draw grids : drawGrid (I, spcGrid, spcPoints, color)
 grid_template   = drawGrid(grid_template    , 32, 2, [ui8_max, ui8_max, 0]); % yellow
@@ -223,7 +224,7 @@ fprintf('----\n');
 fprintf('Creating digiluminescence effect frame by frame \n');
 
 % Mask dense correspondence field with movement mask
-masked_denseCorr_all = uint8( ...
+output_masked_denseCorr_all = uint8( ...
             double(output_denseCorr_all) ...
         .*  double(repmat(permute(output_uMasks_all, [1,2,4,3]), [1,1,3,1])) ...
         /   double(i16_max) ...
@@ -234,7 +235,7 @@ iteration_max = 16;
 for iteration = 1:iteration_max
     % circshift iteration-1 so it starts with current frame
     output_digiLum_all = output_digiLum_all ...
-        + circshift(masked_denseCorr_all, [1,1,1,iteration - 1] ) ...
+        + circshift(output_masked_denseCorr_all, [1,1,1,iteration - 1] ) ...
         * (-((iteration-1)/iteration_max)+1)^(1/2) ... y = sqrt(-x+1) easing
         ;
 end
@@ -265,18 +266,18 @@ else
     dc_scale = double(2^0);
 end
 dc_offset = double(0); % ui8_hlf;
-output_denseCorr_all = (double(output_denseCorr_all) - dc_offset) * dc_scale + dc_offset;
-masked_denseCorr_all = (double(masked_denseCorr_all) - dc_offset) * dc_scale + dc_offset;
+tmp_output_denseCorr_all = (double(output_denseCorr_all) - dc_offset) * dc_scale + dc_offset;
+tmp_output_masked_denseCorr_all = (double(output_masked_denseCorr_all) - dc_offset) * dc_scale + dc_offset;
 % in grid images
 imwrite( data_C_all(:,:,:,1)                                    ,[ 'test_01_Color.png'              ]);
 imwrite(uint8( data_D_all(:,:,1)                / u16_2_ui8 )   ,[ 'test_02_Depth.png'              ]);
 imwrite(uint8( output_cleanPlate                / u16_2_ui8 )   ,[ 'test_02_Depth_cPlate.png'       ]);
 imwrite(uint8( output_uMasks_all(:,:,1)         / u16_2_ui8 )   ,[ 'test_03_uMask.png'              ]);
-imwrite(uint8( output_denseCorr_all(:,:,:,1) )  + ui8_hlf       ,[ 'test_04_denseCorr.png'          ]);
 imwrite(uint8( grid_template(:,:,:) )                           ,[ 'test_05_grid_template.png'      ]);
 imwrite(uint8( output_grid_all(:,:,:,1) )                       ,[ 'test_05_grid_warped.png'        ]);
-imwrite(uint8( masked_denseCorr_all(:,:,:,1) )  + ui8_hlf       ,[ 'test_06_denseCorr_masked.png'   ]);
 imwrite(uint8( output_digiLum_all(:,:,:,1) )                    ,[ 'test_06_digiLum.png'            ]);
+imwrite(uint8( tmp_output_denseCorr_all(:,:,:,1) )  + ui8_hlf           ,[ 'test_04_denseCorr.png'          ]);
+imwrite(uint8( tmp_output_masked_denseCorr_all(:,:,:,1) )  + ui8_hlf    ,[ 'test_06_denseCorr_masked.png'   ]);
 % print time 
 toc
 
@@ -286,16 +287,16 @@ toc
 tic
 fprintf([' - videos - reformatting data - ']);
 % must have a [w,h,bitDepth, frames] array for video file writing
-data_D_all = permute(data_D_all, [1,2,4,3]);
-output_uMasks_all = permute(output_uMasks_all, [1,2,4,3]);
+tmp_data_D_all = permute(data_D_all, [1,2,4,3]);
+tmp_output_uMasks_all = permute(output_uMasks_all, [1,2,4,3]);
 % IMG must be of one of the following classes: double, single, uint8
-data_C_all                  = uint8(data_C_all                              )               ;
-data_D_all                  = uint8(data_D_all              / u16_2_ui8     )               ;
-output_uMasks_all           = uint8(output_uMasks_all       / u16_2_ui8     )               ;
-output_denseCorr_all        = uint8(output_denseCorr_all                    )   + ui8_hlf   ;
-output_grid_all             = uint8(output_grid_all                         )               ;
-masked_denseCorr_all        = uint8(masked_denseCorr_all                    )   + ui8_hlf   ;
-output_digiLum_all          = uint8(output_digiLum_all                      )               ;
+tmp_data_C_all                  = uint8(data_C_all                              )               ;
+tmp_data_D_all                  = uint8(tmp_data_D_all          / i16_2_ui8     )               ;
+tmp_output_uMasks_all           = uint8(tmp_output_uMasks_all   / i16_2_ui8     )               ;
+tmp_output_denseCorr_all        = uint8(tmp_output_denseCorr_all                )   + ui8_hlf   ;
+tmp_output_grid_all             = uint8(output_grid_all                         )               ;
+tmp_output_masked_denseCorr_all = uint8(tmp_output_masked_denseCorr_all         )   + ui8_hlf   ;
+tmp_output_digiLum_all          = uint8(output_digiLum_all                      )               ;
 % print time
 toc
 
@@ -304,7 +305,7 @@ tic
 fprintf([' - videos - data_C_all - ']);
 writerObj = VideoWriter(['test_01_Color.mp4'], 'MPEG-4');
 open(writerObj);
-writeVideo(writerObj,data_C_all)
+writeVideo(writerObj,tmp_data_C_all)
 close(writerObj);
 % print time
 toc
@@ -314,7 +315,7 @@ tic
 fprintf([' - videos - data_D_all - ']);
 writerObj = VideoWriter(['test_02_Depth.mp4'], 'MPEG-4');
 open(writerObj);
-writeVideo(writerObj,data_D_all)
+writeVideo(writerObj,tmp_data_D_all)
 close(writerObj);
 % print time
 toc
@@ -324,7 +325,7 @@ tic
 fprintf([' - videos - output_uMasks_all - ']);
 writerObj = VideoWriter(['test_03_uMask.mp4'], 'MPEG-4');
 open(writerObj);
-writeVideo(writerObj,output_uMasks_all)
+writeVideo(writerObj,tmp_output_uMasks_all)
 close(writerObj);
 % print time
 toc
@@ -334,7 +335,7 @@ tic
 fprintf([' - videos - output_denseCorr_all - ']);
 writerObj = VideoWriter(['test_04_denseCorr.mp4'], 'MPEG-4');
 open(writerObj);
-writeVideo(writerObj,output_denseCorr_all)
+writeVideo(writerObj,tmp_output_denseCorr_all)
 close(writerObj);
 % print time
 toc
@@ -344,17 +345,17 @@ tic
 fprintf([' - videos - output_grid_all - ']);
 writerObj = VideoWriter(['test_05_grid_warped.mp4'], 'MPEG-4');
 open(writerObj);
-writeVideo(writerObj,output_grid_all)
+writeVideo(writerObj,tmp_output_grid_all)
 close(writerObj);
 % print time
 toc
 
-% masked_denseCorr_all
+% output_masked_denseCorr_all
 tic
-fprintf([' - videos - masked_denseCorr_all - ']);
+fprintf([' - videos - output_masked_denseCorr_all - ']);
 writerObj = VideoWriter(['test_06_denseCorr_masked.mp4'], 'MPEG-4');
 open(writerObj);
-writeVideo(writerObj,masked_denseCorr_all)
+writeVideo(writerObj,tmp_output_masked_denseCorr_all)
 close(writerObj);
 % print time
 toc
@@ -364,13 +365,14 @@ tic
 fprintf([' - videos - output_digiLum_all - ']);
 writerObj = VideoWriter(['test_06_digiLum.mp4'], 'MPEG-4');
 open(writerObj);
-writeVideo(writerObj,output_digiLum_all)
+writeVideo(writerObj,tmp_output_digiLum_all)
 close(writerObj);
 % print time
 toc
 
 % clean up memory
 clear C_all D_all joint_positions_all timestamps writerObj
+clear writerObj tmp_*
 
 
 %% Report timestamp
