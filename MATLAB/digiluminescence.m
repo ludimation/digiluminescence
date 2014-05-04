@@ -95,6 +95,8 @@ D_all_diff                  = abs(D_all_clean - D_all_cPlate);
 inds_BG                     = abs(D_all_diff) < data_mask_thresh;
 output_uMasks_all           = D_all_clean;
 output_uMasks_all(inds_BG)  = i16_max;
+% invert the mask so it can be used as a scalar later
+output_uMasks_all = i16_max - output_uMasks_all;
 
 % clean up
 clear inds_positive inds_BG
@@ -228,11 +230,12 @@ masked_denseCorr_all = uint8( ...
     );
 
 % create digiLum field from faded, circshifted versions of masked denseCorr
-for iteration = 1:16
+iteration_max = 16;
+for iteration = 1:iteration_max
     % circshift iteration-1 so it starts with current frame
     output_digiLum_all = output_digiLum_all ...
         + circshift(masked_denseCorr_all, [1,1,1,iteration - 1] ) ...
-        / iteration^2 ...
+        * (-((iteration-1)/iteration_max)+1)^(1/2) ... y = sqrt(-x+1) easing
         ;
 end
 
