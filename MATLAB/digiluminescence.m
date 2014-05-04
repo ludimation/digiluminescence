@@ -47,12 +47,6 @@ i16_2_ui8 = 2^7;
 n_joints            = size(     data_joint_positions_all         , 1         );
 n_frames            = length(   data_timestamps                              );
 
-output_cleanPlate       = zeros(    size(data_D_all(:,:,1))             , 'int16'   );
-output_uMasks_all       = zeros(    size(data_D_all)                    , 'int16'   );
-output_denseCorr_all    = ones(     size(data_C_all)                    , 'int16'   ) * double(ui8_hlf);
-output_digiLum_all      = ones(     size(data_C_all)                    , 'uint8'   ) * double(ui8_hlf);
-output_grid_all         = zeros(    size(data_C_all)                    , 'uint8'   );
-output_C_all            = zeros(    size(data_C_all)                    , 'uint8'   );
 % print time
 toc
 
@@ -61,10 +55,16 @@ tic
 fprintf('----\n');
 fprintf('Preallocating output values \n');
 
+output_C_all                    = zeros(    size(data_C_all)                    , 'uint8'   );
+output_cleanPlate               = zeros(    size(data_D_all(:,:,1))             , 'int16'   );
+output_uMasks_all               = zeros(    size(data_D_all)                    , 'int16'   );
+output_denseCorr_all            = ones(     size(data_C_all)                    , 'int16'   ) * double(ui8_hlf);
+output_masked_denseCorr_all     =           output_denseCorr_all                            ;
+output_digiLum_all              = ones(     size(data_C_all)                    , 'uint8'   ) * double(ui8_hlf);
+output_grid_all                 = zeros(    size(data_C_all)                    , 'uint8'   );
+
 % print time
 toc
-
-output_masked_denseCorr_all     =           output_denseCorr_all                            ;
 
 %% Draw grids
 tic
@@ -283,14 +283,14 @@ dc_offset = double(0); % ui8_hlf;
 tmp_output_denseCorr_all = (double(output_denseCorr_all) - dc_offset) * dc_scale + dc_offset;
 tmp_output_masked_denseCorr_all = (double(output_masked_denseCorr_all) - dc_offset) * dc_scale + dc_offset;
 % in grid images
-imwrite( data_C_all(:,:,:,1)                                    ,[ 'test_01_Color.png'              ]);
-imwrite(uint8( output_grid_all(:,:,:,1) )                       ,[ 'test_05_grid_warped.png'        ]);
-imwrite(uint8( output_digiLum_all(:,:,:,1) )                    ,[ 'test_06_digiLum.png'            ]);
+imwrite( data_C_all(:,:,:,1)                                            ,[ 'test_01_Color.png'              ]);
 imwrite(uint8( data_D_all(:,:,1)                / i16_2_ui8 )           ,[ 'test_02_Depth.png'              ]);
 imwrite(uint8( output_cleanPlate                / i16_2_ui8 )           ,[ 'test_02_Depth_cPlate.png'       ]);
 imwrite(uint8( output_uMasks_all(:,:,1)         / i16_2_ui8 )           ,[ 'test_03_uMask.png'              ]);
 imwrite(uint8( tmp_output_denseCorr_all(:,:,:,1) )  + ui8_hlf           ,[ 'test_04_denseCorr.png'          ]);
+imwrite(uint8( output_grid_all(:,:,:,1) )                               ,[ 'test_05_grid_warped.png'        ]);
 imwrite(uint8( tmp_output_masked_denseCorr_all(:,:,:,1) )  + ui8_hlf    ,[ 'test_06_denseCorr_masked.png'   ]);
+imwrite(uint8( output_digiLum_all(:,:,:,1) )                            ,[ 'test_06_digiLum.png'            ]);
 % print time 
 toc
 
