@@ -1,5 +1,5 @@
-function [ out_dl_all, out_D_cPlate, out_uMasks_all, out_j_features, out_denseCorr_all, out_grid_all ] = ...
-    digiluminescence(C_all, D_all, joint_positions_all, timestamps, calcDenseCorr)
+function [ output_C_all, output_cleanPlate, output_uMasks_all, output_j_features, output_denseCorr_all, output_digiLum_all, output_grid_all ] = ...
+    digiluminescence(data_C_all, data_D_all, data_joint_positions_all, data_timestamps, data_mask_thresh, data_calcDenseCorr )
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 % TODO: 
@@ -18,9 +18,12 @@ fprintf('====\n');
 fprintf('Handling default arguments \n');
 for i = 1 % For loop is for code collapsing only (so I don't have to look at these)
 
-    % set default value for first argument
+    % set default value for inputs
     if( nargin < 5 )
-        calcDenseCorr = false;
+        data_mask_thresh = 256;
+    end
+    if( nargin < 6 )
+        data_calcDenseCorr = false;
     end
    
 end
@@ -28,29 +31,33 @@ end
 % print time
 toc
 
+% clean up
+clear i
+
 %% Initialize variables
 tic
 fprintf('----\n');
 fprintf('Initializing variables \n');
-
-out_D_cPlate       	= zeros(    size(D_all(:,:,1))          , 'int16'   );
-out_uMasks_all      = zeros(    size(D_all)                 , 'int16'   );
-out_denseCorr_all   = zeros(    size(C_all)                 , 'uint8'   );
-out_grid_all        = zeros(    size(C_all)                 , 'uint8'   );
-grid_template       = zeros(    size(out_grid_all(:,:,:,1)) , 'uint8'   );
-out_dl_all          = zeros(    size(C_all)                 , 'uint8'   );
-
-n_joints            = size(     joint_positions_all         , 1         );
-n_frames            = length(   timestamps                              );
 
 ui8_max = intmax('uint8');
 ui8_hlf = round(intmax('uint8')/2);
 i16_max = intmax('int16');
 u16_2_ui8 = 2^7;
 
+n_joints            = size(     data_joint_positions_all         , 1         );
+n_frames            = length(   data_timestamps                              );
+
+output_cleanPlate       = zeros(    size(data_D_all(:,:,1))             , 'int16'   );
+output_uMasks_all       = zeros(    size(data_D_all)                    , 'int16'   );
+output_denseCorr_all    = ones(     size(data_C_all)                    , 'uint8'   ) * ui8_hlf;
+output_digiLum_all      = ones(     size(data_C_all)                    , 'uint8'   ) * ui8_hlf;
+output_grid_all         = zeros(    size(data_C_all)                    , 'uint8'   );
+grid_template           = zeros(    size(output_grid_all(:,:,:,1))      , 'uint8'   );
+output_C_all            = zeros(    size(data_C_all)                    , 'uint8'   );
+
 % Draw grids : drawGrid (I, spcGrid, spcPoints, color)
 grid_template   = drawGrid(grid_template    , 32, 2, [ui8_max, ui8_max, 0]); % yellow
-out_grid_all    = drawGrid(out_grid_all     , 32, 1, [ui8_max, ui8_max, 0]); % yellow
+output_grid_all    = drawGrid(output_grid_all     , 32, 1, [ui8_max, ui8_max, 0]); % yellow
 
 % print time
 toc
@@ -63,7 +70,7 @@ fprintf('Creating clean plate for depth data \n');
 % out_D_cPlate is an image that represents the background of the scene,
 % which is essentially the maximum depth values found in all frames of the
 % depth data
-out_D_cPlate = max(D_all,[],3);
+output_cleanPlate = max(data_D_all,[],3);
 
 % print time
 toc
@@ -78,16 +85,16 @@ fprintf('Creating user masks \n');
 % out_D_cPlate
 
 % clean up depth images by putting cPlate in areas that have no value
-inds_positive           = find(D_all > -8); 
-D_all_cPlate            = repmat(out_D_cPlate, [1,1,size(D_all,3)]);
-D_all_clean             = D_all_cPlate;
-D_all_clean(inds_positive) = D_all(inds_positive);
+inds_positive               = data_D_all > -8; 
+D_all_cPlate                = repmat(output_cleanPlate, [1,1,size(data_D_all,3)]);
+D_all_clean                 = D_all_cPlate;
+D_all_clean(inds_positive)  = data_D_all(inds_positive);
 % calculate masks for areas with large differences between the clean Depth
 % image and the cleanPlate
-D_all_diff              = abs(D_all_clean - D_all_cPlate);
-inds_BG                 = abs(D_all_diff) < 1024; %TODO: Make this threshold user-specifiable
-out_uMasks_all          = D_all_clean;
-out_uMasks_all(inds_BG) = -8;
+D_all_diff                  = abs(D_all_clean - D_all_cPlate);
+inds_BG                     = abs(D_all_diff) < data_mask_thresh;
+output_uMasks_all           = D_all_clean;
+output_uMasks_all(inds_BG)  = i16_max;
 
 % clean up
 clear inds_positive inds_BG
@@ -106,7 +113,7 @@ fprintf('Calculating projective joint positions for all frames \n');
 %  TODO: 
 %    - would be nice if the projectiveTransformation function only took two
 %    args (p, to) and did the reshaping on its own
-j_pos_all_reshaped = reshape(permute(joint_positions_all, [2 1 3]), 3, n_frames*n_joints);
+j_pos_all_reshaped = reshape(permute(data_joint_positions_all, [2 1 3]), 3, n_frames*n_joints);
 j_pos_all_x = j_pos_all_reshaped(1,:);
 j_pos_all_y = j_pos_all_reshaped(2,:);
 j_pos_all_z = j_pos_all_reshaped(3,:);
@@ -134,7 +141,7 @@ j_endingFeatures    = permute(j_pos_all_projective(         :, 1:2, :)  , [2,1,3
 j_startingFeatures  = circshift(j_startingFeatures  , 1);
 j_endingFeatures    = circshift(j_endingFeatures    , 1);
 % flip x values and translate them the width of the screen
-out_j_features = [ j_endingFeatures; j_startingFeatures];
+output_j_features = [ j_endingFeatures; j_startingFeatures];
 
 % TODO: 
 %    - add additional feature points along the lines of larger key limbs \
@@ -144,7 +151,7 @@ out_j_features = [ j_endingFeatures; j_startingFeatures];
 %    doesn't warp around so much
 
 % draw joints in yellow: drawPoints(points, I, size, color)
-out_grid_all = drawPoints(j_startingFeatures, out_grid_all, 16, [ui8_max, ui8_max, 0] ); % yellow
+output_grid_all = drawPoints(j_startingFeatures, output_grid_all, 16, [ui8_max, ui8_max, 0] ); % yellow
 %TODO: draw limbs in white
 % drawLimbs(j_pos_all_projective, out_grid_all, 4, [ui8_max, ui8_max, 0] ); % yellow
 
@@ -162,27 +169,27 @@ fprintf('----\n');
 fprintf('Calculating dense correspondence fields frame by frame \n');
 
 % create dense correspondence fields one frame at a time
-if calcDenseCorr
+if data_calcDenseCorr
     for iterator = 1:n_frames
         tic
             fprintf([' - frame ' num2str(iterator) ' - ']);
             [ denseCorr, grid ] = thin_plate_denseCorrespondence(...
-                out_j_features(:, :, iterator), ...
-                out_grid_all(:,:,:, iterator) ...
+                output_j_features(:, :, iterator), ...
+                output_grid_all(:,:,:, iterator) ...
             );
-            out_denseCorr_all(:,:,:, iterator) = denseCorr;
-            out_grid_all(:,:,:, iterator) = grid;
+            output_denseCorr_all(:,:,:, iterator) = denseCorr;
+            output_grid_all(:,:,:, iterator) = grid;
         % print time
         toc
     end
 end
 
 % draw grid again sparser and blue to show where it started : drawGrid (I, spcGrid, spcPoints, color)
-out_grid_all = drawGrid(out_grid_all, 32, 4, [0 , ui8_max , ui8_max]); % cyan
+output_grid_all = drawGrid(output_grid_all, 32, 4, [0 , ui8_max , ui8_max]); % cyan
 % draw ending joints in magenta (small radius -- warped joints will appear as large yellow dots)
-out_grid_all = drawPoints(j_endingFeatures      , out_grid_all, 8, [ui8_max , 0         , ui8_max] ); % magenta
+output_grid_all = drawPoints(j_endingFeatures      , output_grid_all, 8, [ui8_max , 0         , ui8_max] ); % magenta
 % draw starting joints in blue (smaller radius)
-out_grid_all = drawPoints(j_startingFeatures    , out_grid_all, 6, [0       , ui8_max   , ui8_max] ); % cyan
+output_grid_all = drawPoints(j_startingFeatures    , output_grid_all, 6, [0       , ui8_max   , ui8_max] ); % cyan
 
 % cleanup
 clear j_pos_all_projective j_pos_all_projective2
@@ -197,10 +204,31 @@ fprintf('----\n');
 fprintf('Creating digiluminescence effect frame by frame \n');
 
 % Mask dense correspondence field with movement mask
+masked_denseCorr_all = uint8( ...
+        (double(output_denseCorr_all) - double(ui8_hlf)) ...
+        .* double(repmat(permute(output_uMasks_all, [1,2,4,3]), [1,1,3,1]) / double(ui8_hlf)) ...
+        + double(ui8_hlf)...
+    );
 
-% Fade effect from previous frame
+% masked_denseCorr_all = output_denseCorr_all ./ uint8(repmat(permute(output_uMasks_all, [1,2,4,3]), [1,1,3,1]) / ui8_hlf);
+% masked_denseCorr_all = masked_denseCorr_all + ui8_hlf;
+% for chan = 1:3
+%     masked_denseCorr_all(:, :, chan, :) = masked_denseCorr_all(:, :, chan, :) ...
+%         ./ ui8_max ...  uint8(permute(output_uMasks_all, [1,2,4,3])) ...
+%     ;
+% end
 
-% Draw colored lines along vectors of the field
+% create digiLum field from faded, circshifted versions of masked denseCorr
+for iteration = 1:16
+    % circshift iteration-1 so it starts with current frame
+    output_digiLum_all = output_digiLum_all ...
+        + circshift(masked_denseCorr_all, [1,1,1,iteration - 1] ) ...
+        / iteration^2 ...
+        ;
+end
+
+% Draw colored lines along vectors of the field into the digiluminescence
+% effect output
 
 % print time
 toc
@@ -216,13 +244,15 @@ tic
 fprintf([' - images - ']);
 % TODO: include drawings of old, new, and warped positions of joints/limbs
 % in grid images
-imwrite( C_all(:,:,:,1)                                     ,[ 'test_01_Color.png'          ]);
-imwrite(uint8( D_all(:,:,1)                 / u16_2_ui8 )   ,[ 'test_02_Depth.png'          ]);
-imwrite(uint8( out_D_cPlate                 / u16_2_ui8 )   ,[ 'test_02_Depth_cPlate.png'   ]);
-imwrite(uint8( out_uMasks_all(:,:,1)        / u16_2_ui8 )   ,[ 'test_03_uMask.png'          ]);
-imwrite(uint8( out_denseCorr_all(:,:,:,1) )                 ,[ 'test_04_denseCorr.png'      ]);
-imwrite(uint8( grid_template(:,:,:) )                       ,[ 'test_05_grid_template.png'  ]);
-imwrite(uint8( out_grid_all(:,:,:,1) )                      ,[ 'test_05_grid_warped.png'    ]);
+imwrite( data_C_all(:,:,:,1)                                    ,[ 'test_01_Color.png'              ]);
+imwrite(uint8( data_D_all(:,:,1)                / u16_2_ui8 )   ,[ 'test_02_Depth.png'              ]);
+imwrite(uint8( output_cleanPlate                / u16_2_ui8 )   ,[ 'test_02_Depth_cPlate.png'       ]);
+imwrite(uint8( output_uMasks_all(:,:,1)         / u16_2_ui8 )   ,[ 'test_03_uMask.png'              ]);
+imwrite(uint8( output_denseCorr_all(:,:,:,1) )                  ,[ 'test_04_denseCorr.png'          ]);
+imwrite(uint8( grid_template(:,:,:) )                           ,[ 'test_05_grid_template.png'      ]);
+imwrite(uint8( output_grid_all(:,:,:,1) )                       ,[ 'test_05_grid_warped.png'        ]);
+imwrite(uint8( masked_denseCorr_all(:,:,:,1) )                  ,[ 'test_06_denseCorr_masked.png'   ]);
+imwrite(uint8( output_digiLum_all(:,:,:,1) )                    ,[ 'test_06_digiLum.png'            ]);
 % print time
 toc
 
@@ -232,66 +262,89 @@ toc
 tic
 fprintf([' - videos - reformatting data - ']);
 % must have a [w,h,bitDepth, frames] array for video file writing
-D_all = permute(D_all, [1,2,4,3]);
-out_uMasks_all = permute(out_uMasks_all, [1,2,4,3]);
+data_D_all = permute(data_D_all, [1,2,4,3]);
+output_uMasks_all = permute(output_uMasks_all, [1,2,4,3]);
 % scale dense correspondence
-dc_scale = double(2^4); % turn up coefficient to increase visualcontrast in dense correspondence video
-out_denseCorr_all = (double(out_denseCorr_all) - double(ui8_hlf)) * dc_scale + double(ui8_hlf);
+dc_scale = double(2^2); % turn up coefficient to increase visualcontrast in dense correspondence video
+output_denseCorr_all = (double(output_denseCorr_all) - double(ui8_hlf)) * dc_scale + double(ui8_hlf);
+masked_denseCorr_all = (double(masked_denseCorr_all) - double(ui8_hlf)) * dc_scale + double(ui8_hlf);
 % IMG must be of one of the following classes: double, single, uint8
-C_all                   = uint8(C_all                               );
-D_all                   = uint8(D_all               / u16_2_ui8     );
-out_uMasks_all          = uint8(out_uMasks_all      / u16_2_ui8     );
-out_denseCorr_all       = uint8(out_denseCorr_all                   );
-out_grid_all            = uint8(out_grid_all                        );
+data_C_all                  = uint8(data_C_all                              );
+data_D_all                  = uint8(data_D_all              / u16_2_ui8     );
+output_uMasks_all           = uint8(output_uMasks_all       / u16_2_ui8     );
+output_denseCorr_all        = uint8(output_denseCorr_all                    );
+output_grid_all             = uint8(output_grid_all                         );
+masked_denseCorr_all        = uint8(masked_denseCorr_all                    );
+output_digiLum_all          = uint8(output_digiLum_all                      );
 % print time
 toc
 
-% C_all
+% data_C_all
 tic
-fprintf([' - videos - C_all - ']);
+fprintf([' - videos - data_C_all - ']);
 writerObj = VideoWriter(['test_01_Color.mp4'], 'MPEG-4');
 open(writerObj);
-writeVideo(writerObj,C_all)
+writeVideo(writerObj,data_C_all)
 close(writerObj);
 % print time
 toc
 
-% D_all
+% data_D_all
 tic
-fprintf([' - videos - D_all - ']);
+fprintf([' - videos - data_D_all - ']);
 writerObj = VideoWriter(['test_02_Depth.mp4'], 'MPEG-4');
 open(writerObj);
-writeVideo(writerObj,D_all)
+writeVideo(writerObj,data_D_all)
 close(writerObj);
 % print time
 toc
 
-% out_uMasks_all
+% output_uMasks_all
 tic
-fprintf([' - videos - out_uMasks_all - ']);
+fprintf([' - videos - output_uMasks_all - ']);
 writerObj = VideoWriter(['test_03_uMask.mp4'], 'MPEG-4');
 open(writerObj);
-writeVideo(writerObj,out_uMasks_all)
+writeVideo(writerObj,output_uMasks_all)
 close(writerObj);
 % print time
 toc
 
-% out_denseCorr_all
+% output_denseCorr_all
 tic
-fprintf([' - videos - out_denseCorr_all - ']);
+fprintf([' - videos - output_denseCorr_all - ']);
 writerObj = VideoWriter(['test_04_denseCorr.mp4'], 'MPEG-4');
 open(writerObj);
-writeVideo(writerObj,out_denseCorr_all)
+writeVideo(writerObj,output_denseCorr_all)
 close(writerObj);
 % print time
 toc
 
-% out_grid_all
+% output_grid_all
 tic
-fprintf([' - videos - out_grid_all - ']);
+fprintf([' - videos - output_grid_all - ']);
 writerObj = VideoWriter(['test_05_grid_warped.mp4'], 'MPEG-4');
 open(writerObj);
-writeVideo(writerObj,out_grid_all)
+writeVideo(writerObj,output_grid_all)
+close(writerObj);
+% print time
+toc
+
+% masked_denseCorr_all
+tic
+fprintf([' - videos - masked_denseCorr_all - ']);
+writerObj = VideoWriter(['test_06_denseCorr_masked.mp4'], 'MPEG-4');
+open(writerObj);
+writeVideo(writerObj,masked_denseCorr_all)
+close(writerObj);
+% print time
+toc
+
+% output_digiLum_all
+tic
+fprintf([' - videos - output_digiLum_all - ']);
+writerObj = VideoWriter(['test_06_digiLum.mp4'], 'MPEG-4');
+open(writerObj);
+writeVideo(writerObj,output_digiLum_all)
 close(writerObj);
 % print time
 toc
@@ -327,7 +380,7 @@ function [ I ] = drawGrid (I, spcGrid, spcP, color)
     I(spcP:spcP:end         , 1                   , 3,:) = color(3); % first column b
     I(spcGrid:spcGrid:end   , spcP:spcP:end       , 1,:) = color(1); % everything in between r
     I(spcGrid:spcGrid:end   , spcP:spcP:end       , 2,:) = color(2); % everything in between g
-    I(spcGrid:spcGrid:end   , spcP:spcP:end       , 3,:) = color(3); % everything in between b
+    I(spcGrid:spcGrid:end   , spcP:spcP:end       , 3,:) = color(3); % everything in between b, etc.
     I(spcP:spcP:end         , spcGrid:spcGrid:end , 1,:) = color(1); 
     I(spcP:spcP:end         , spcGrid:spcGrid:end , 2,:) = color(2);
     I(spcP:spcP:end         , spcGrid:spcGrid:end , 3,:) = color(3); % TODO: there HAS to be a more elegant way to do this
@@ -354,7 +407,6 @@ function [ I ] = drawPoints(p_array, I, sz_draw, c_rgb)
     % indeces must be rounded doubles / integers %TODO: might also want to
     % check values to make sure none of them are 0, nor max width and
     % height of I
-%     p_array
     p_array = round(p_array);
     p_size = size(p_array);
     p_n = prod(p_size);
