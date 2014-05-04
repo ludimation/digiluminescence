@@ -325,70 +325,70 @@ toc
 % data_C_all
 tic
 fprintf([' - videos - data_C_all - ']);
-writerObj = VideoWriter(['test_01_Color.mp4'], 'MPEG-4');
-open(writerObj);
-writeVideo(writerObj,tmp_data_C_all)
-close(writerObj);
+    writerObj = VideoWriter(['test_01_Color.mp4'], 'MPEG-4');
+    open(writerObj);
+    writeVideo(writerObj,tmp_data_C_all)
+    close(writerObj);
 % print time
 toc
 
 % data_D_all
 tic
 fprintf([' - videos - data_D_all - ']);
-writerObj = VideoWriter(['test_02_Depth.mp4'], 'MPEG-4');
-open(writerObj);
-writeVideo(writerObj,tmp_data_D_all)
-close(writerObj);
+    writerObj = VideoWriter(['test_02_Depth.mp4'], 'MPEG-4');
+    open(writerObj);
+    writeVideo(writerObj,tmp_data_D_all)
+    close(writerObj);
 % print time
 toc
 
 % output_uMasks_all
 tic
 fprintf([' - videos - output_uMasks_all - ']);
-writerObj = VideoWriter(['test_03_uMask.mp4'], 'MPEG-4');
-open(writerObj);
-writeVideo(writerObj,tmp_output_uMasks_all)
-close(writerObj);
+    writerObj = VideoWriter(['test_03_uMask.mp4'], 'MPEG-4');
+    open(writerObj);
+    writeVideo(writerObj,tmp_output_uMasks_all)
+    close(writerObj);
 % print time
 toc
 
 % output_denseCorr_all
 tic
 fprintf([' - videos - output_denseCorr_all - ']);
-writerObj = VideoWriter(['test_04_denseCorr.mp4'], 'MPEG-4');
-open(writerObj);
-writeVideo(writerObj,tmp_output_denseCorr_all)
-close(writerObj);
+    writerObj = VideoWriter(['test_04_denseCorr.mp4'], 'MPEG-4');
+    open(writerObj);
+    writeVideo(writerObj,tmp_output_denseCorr_all)
+    close(writerObj);
 % print time
 toc
 
 % output_grid_all
 tic
 fprintf([' - videos - output_grid_all - ']);
-writerObj = VideoWriter(['test_05_grid_warped.mp4'], 'MPEG-4');
-open(writerObj);
-writeVideo(writerObj,tmp_output_grid_all)
-close(writerObj);
+    writerObj = VideoWriter(['test_05_grid_warped.mp4'], 'MPEG-4');
+    open(writerObj);
+    writeVideo(writerObj,tmp_output_grid_all)
+    close(writerObj);
 % print time
 toc
 
 % output_masked_denseCorr_all
 tic
 fprintf([' - videos - output_masked_denseCorr_all - ']);
-writerObj = VideoWriter(['test_06_denseCorr_masked.mp4'], 'MPEG-4');
-open(writerObj);
-writeVideo(writerObj,tmp_output_masked_denseCorr_all)
-close(writerObj);
+    writerObj = VideoWriter(['test_06_denseCorr_masked.mp4'], 'MPEG-4');
+    open(writerObj);
+    writeVideo(writerObj,tmp_output_masked_denseCorr_all)
+    close(writerObj);
 % print time
 toc
 
 % output_digiLum_all
 tic
 fprintf([' - videos - output_digiLum_all - ']);
-writerObj = VideoWriter(['test_06_digiLum.mp4'], 'MPEG-4');
-open(writerObj);
-writeVideo(writerObj,tmp_output_digiLum_all)
-close(writerObj);
+    writerObj = VideoWriter(['test_06_digiLum.mp4'], 'MPEG-4');
+    open(writerObj);
+    writeVideo(writerObj,tmp_output_digiLum_all)
+    close(writerObj);
 % print time
 toc
 
