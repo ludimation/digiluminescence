@@ -255,7 +255,15 @@ fprintf('Saving out some test files \n');
 tic
 fprintf([' - images - ']);
 % scale dense correspondence
-dc_scale = double(2^3); % turn up coefficient to increase visualcontrast in dense correspondence video
+if data_calcDenseCorr
+    % turn up coefficient to increase visualcontrast in dense
+    % correspondence data
+    dc_scale = double(2^3); 
+else
+    % if dense correspondence data is not being generated, it is already
+    % maximal by default, so you don't need to scale it
+    dc_scale = double(2^0);
+end
 dc_offset = double(0); % ui8_hlf;
 output_denseCorr_all = (double(output_denseCorr_all) - dc_offset) * dc_scale + dc_offset;
 masked_denseCorr_all = (double(masked_denseCorr_all) - dc_offset) * dc_scale + dc_offset;

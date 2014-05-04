@@ -49,8 +49,8 @@ im_sz_wh = im_sz(1:2);
 in_I = double(in_I);
 
 % separate features for image1 and image2
-feats_I1 = in_feature_pairs(1:2,:); % [x1, x2, ..., xn; y1, y2, ..., yn] for first set of features
-feats_I2 = in_feature_pairs(3:4,:); % [x1, x2, ..., xn; y1, y2, ..., yn] for second set of features
+feats_I1 = in_feature_pairs(1:2,:); % [x1, x2, ..., xn; y1, y2, ..., yn] for first set of features (to)
+feats_I2 = in_feature_pairs(3:4,:); % [x1, x2, ..., xn; y1, y2, ..., yn] for second set of features (from)
 
 %% set up the linear system
 
@@ -109,7 +109,7 @@ i16_max = intmax('int16');
 i16_hlf = int16(i16_max / 2);
 out_denseCorrespondence(:,:,1) = int16(reshape((x_interps(1,:) - xx'), im_sz_wh(1),im_sz_wh(2)));
 out_denseCorrespondence(:,:,2) = int16(reshape((x_interps(2,:) - yy'), im_sz_wh(1),im_sz_wh(2)));
-out_denseCorrespondence(:,:,3) = 0; % TODO: should eventually include z in dense correspondence calculations
+out_denseCorrespondence(:,:,3) = 2^3; % TODO: should eventually include z in dense correspondence calculations
 
 if ~no_out_I_interp
     vr = reshape(in_I(:,:,1),n_pix_inputs,1);

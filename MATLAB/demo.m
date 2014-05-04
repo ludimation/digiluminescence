@@ -21,14 +21,14 @@ toc
 fprintf('====\n');
 
 %% Run digiluminescence
-data_mask_thresh = 512;
-data_calcDenseCorr = false;
+data_mask_thresh = 256;
+% data_calcDenseCorr = false;
 data_calcDenseCorr = true; %comment this line out to skip calculate dense correspondence
 data_n_framesToProcess = 30:31; % smallest test amount
 % data_n_framesToProcess = 30:35; % 5 frames
-% n_framesToProcess = 1:50;
-% n_framesToProcess = 1:300;
-% n_framesToProcess = 1:length(data_timestamps); % Uncomment this line for full data processing, comment it out for smaller set above
+% data_n_framesToProcess = 1:50;
+% data_n_framesToProcess = 1:300;
+% data_n_framesToProcess = 1:length(data_timestamps); % Uncomment this line for full data processing, comment it out for smaller set above
 
 [ output_C_all, output_cleanPlate, output_uMasks_all, output_j_features, output_denseCorr_all, output_digiLum_all, output_grid_all ] = digiluminescence( ...
         data_C_all(:,:,:, data_n_framesToProcess), ...
