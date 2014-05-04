@@ -23,7 +23,7 @@ fprintf('====\n');
 %% Run digiluminescence
 data_mask_thresh = 512;
 data_calcDenseCorr = false;
-% data_calcDenseCorr = true; %comment this line out to skip calculate dense correspondence
+data_calcDenseCorr = true; %comment this line out to skip calculate dense correspondence
 data_n_framesToProcess = 30:31; % smallest test amount
 % data_n_framesToProcess = 30:35; % 5 frames
 % n_framesToProcess = 1:50;

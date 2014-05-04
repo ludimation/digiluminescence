@@ -242,16 +242,20 @@ fprintf('Saving out some test files \n');
 %%%%%%%%%%%%
 tic
 fprintf([' - images - ']);
-% TODO: include drawings of old, new, and warped positions of joints/limbs
+% scale dense correspondence
+dc_scale = double(2^2); % turn up coefficient to increase visualcontrast in dense correspondence video
+dc_offset = double(0); % ui8_hlf;
+output_denseCorr_all = (double(output_denseCorr_all) - dc_offset) * dc_scale + dc_offset;
+masked_denseCorr_all = (double(masked_denseCorr_all) - dc_offset) * dc_scale + dc_offset;
 % in grid images
 imwrite( data_C_all(:,:,:,1)                                    ,[ 'test_01_Color.png'              ]);
 imwrite(uint8( data_D_all(:,:,1)                / u16_2_ui8 )   ,[ 'test_02_Depth.png'              ]);
 imwrite(uint8( output_cleanPlate                / u16_2_ui8 )   ,[ 'test_02_Depth_cPlate.png'       ]);
 imwrite(uint8( output_uMasks_all(:,:,1)         / u16_2_ui8 )   ,[ 'test_03_uMask.png'              ]);
-imwrite(uint8( output_denseCorr_all(:,:,:,1) )                  ,[ 'test_04_denseCorr.png'          ]);
+imwrite(uint8( output_denseCorr_all(:,:,:,1) )  + ui8_hlf       ,[ 'test_04_denseCorr.png'          ]);
 imwrite(uint8( grid_template(:,:,:) )                           ,[ 'test_05_grid_template.png'      ]);
 imwrite(uint8( output_grid_all(:,:,:,1) )                       ,[ 'test_05_grid_warped.png'        ]);
-imwrite(uint8( masked_denseCorr_all(:,:,:,1) )                  ,[ 'test_06_denseCorr_masked.png'   ]);
+imwrite(uint8( masked_denseCorr_all(:,:,:,1) )  + ui8_hlf       ,[ 'test_06_denseCorr_masked.png'   ]);
 imwrite(uint8( output_digiLum_all(:,:,:,1) )                    ,[ 'test_06_digiLum.png'            ]);
 % print time
 toc
@@ -264,18 +268,14 @@ fprintf([' - videos - reformatting data - ']);
 % must have a [w,h,bitDepth, frames] array for video file writing
 data_D_all = permute(data_D_all, [1,2,4,3]);
 output_uMasks_all = permute(output_uMasks_all, [1,2,4,3]);
-% scale dense correspondence
-dc_scale = double(2^2); % turn up coefficient to increase visualcontrast in dense correspondence video
-output_denseCorr_all = (double(output_denseCorr_all) - double(ui8_hlf)) * dc_scale + double(ui8_hlf);
-masked_denseCorr_all = (double(masked_denseCorr_all) - double(ui8_hlf)) * dc_scale + double(ui8_hlf);
 % IMG must be of one of the following classes: double, single, uint8
-data_C_all                  = uint8(data_C_all                              );
-data_D_all                  = uint8(data_D_all              / u16_2_ui8     );
-output_uMasks_all           = uint8(output_uMasks_all       / u16_2_ui8     );
-output_denseCorr_all        = uint8(output_denseCorr_all                    );
-output_grid_all             = uint8(output_grid_all                         );
-masked_denseCorr_all        = uint8(masked_denseCorr_all                    );
-output_digiLum_all          = uint8(output_digiLum_all                      );
+data_C_all                  = uint8(data_C_all                              )               ;
+data_D_all                  = uint8(data_D_all              / u16_2_ui8     )               ;
+output_uMasks_all           = uint8(output_uMasks_all       / u16_2_ui8     )               ;
+output_denseCorr_all        = uint8(output_denseCorr_all                    )   + ui8_hlf   ;
+output_grid_all             = uint8(output_grid_all                         )               ;
+masked_denseCorr_all        = uint8(masked_denseCorr_all                    )   + ui8_hlf   ;
+output_digiLum_all          = uint8(output_digiLum_all                      )               ;
 % print time
 toc
 
