@@ -309,15 +309,15 @@ fprintf('Saving out some test files \n');
 tic
 fprintf([' - reformatting data - ']);
     % IMG data must be of one of the following classes: double, single, uint8
-    tmp_data_C_all                  = uint8(data_C_all                              )               ;
-    tmp_data_D_all                  = uint8(data_D_all              / i16_2_ui8     )               ;
-    tmp_output_cleanPlate           = uint8(output_cleanPlate       / i16_2_ui8     )               ;
-    tmp_output_uMasks_all           = uint8(output_uMasks_all       / i16_2_ui8     )               ;
-    tmp_output_denseCorr_all        = uint8(output_denseCorr_all                    )   + ui8_hlf   ;
-    tmp_output_grid_all             = uint8(output_grid_all                         )               ;
-    tmp_output_denseCorr_masked_all = uint8(output_denseCorr_masked_all             )   + ui8_hlf   ;
-    tmp_output_digiLum_all          = uint8(output_digiLum_all                      )               ;
+    tmp_data_C_all                      = uint8(data_C_all                              )               ;
+    tmp_data_D_all                      = uint8(data_D_all              / i16_2_ui8     )               ;
+    tmp_output_cleanPlate               = uint8(output_cleanPlate       / i16_2_ui8     )               ;
+    tmp_output_uMasks_all               = uint8(output_uMasks_all       / i16_2_ui8     )               ;
+    tmp_output_denseCorr_all            = uint8(output_denseCorr_all                    )   + ui8_hlf   ;
+    tmp_output_grid_all                 = uint8(output_grid_all                         )               ;
+    tmp_output_denseCorr_masked_all     = uint8(output_denseCorr_masked_all             )   + ui8_hlf   ;
     tmp_output_denseCorr_multiframe_all = uint8(output_denseCorr_multiframe_all         )   + ui8_hlf   ;
+    tmp_output_digiLum_all              = uint8(output_digiLum_all                      )               ;
     % must have a [w,h,bitDepth, frames] array for video file writing
     tmp_data_D_all = permute(tmp_data_D_all, [1,2,4,3]);
     tmp_output_uMasks_all = permute(tmp_output_uMasks_all, [1,2,4,3]);
@@ -332,8 +332,8 @@ fprintf([' - reformatting data - ']);
         dc_scale = double(2^0);
     end
     dc_offset = ui8_hlf; % double(0); % 
-    tmp_output_denseCorr_all        = uint8((double(tmp_output_denseCorr_all        ) - dc_offset) * dc_scale + dc_offset);
-    tmp_output_denseCorr_masked_all = uint8((double(tmp_output_denseCorr_masked_all ) - dc_offset) * dc_scale + dc_offset);
+    tmp_output_denseCorr_all            = uint8((double(tmp_output_denseCorr_all            ) - dc_offset) * dc_scale + dc_offset);
+    tmp_output_denseCorr_masked_all     = uint8((double(tmp_output_denseCorr_masked_all     ) - dc_offset) * dc_scale + dc_offset);
     tmp_output_denseCorr_multiframe_all = uint8((double(tmp_output_denseCorr_multiframe_all ) - dc_offset) * dc_scale + dc_offset);
     %clean up
     clear dc_*
@@ -346,15 +346,15 @@ toc
 tic
 fprintf([' - images - ']);
     % save out images
-    imwrite(tmp_data_C_all(:,:,:,1)                     ,[ 'test_01_Color.png'              ]);
-    imwrite(tmp_data_D_all(:,:,:,1)                     ,[ 'test_02_Depth.png'              ]);
-    imwrite(tmp_output_cleanPlate                       ,[ 'test_02_Depth_cPlate.png'       ]);
-    imwrite(tmp_output_uMasks_all(:,:,:,1)              ,[ 'test_03_uMask.png'              ]);
-    imwrite(tmp_output_denseCorr_all(:,:,:,1)           ,[ 'test_04_denseCorr.png'          ]);
-    imwrite(tmp_output_grid_all(:,:,:,1)                ,[ 'test_05_grid_warped.png'        ]);
-    imwrite(tmp_output_denseCorr_masked_all(:,:,:,1)    ,[ 'test_06_denseCorr_masked.png'   ]);
-    imwrite(tmp_output_digiLum_all(:,:,:,1)             ,[ 'test_06_digiLum.png'            ]);
+    imwrite(tmp_data_C_all(:,:,:,1)                     ,[ 'test_01_Color.png'                  ]);
+    imwrite(tmp_data_D_all(:,:,:,1)                     ,[ 'test_02_Depth.png'                  ]);
+    imwrite(tmp_output_cleanPlate                       ,[ 'test_02_Depth_cPlate.png'           ]);
+    imwrite(tmp_output_uMasks_all(:,:,:,1)              ,[ 'test_03_uMask.png'                  ]);
+    imwrite(tmp_output_denseCorr_all(:,:,:,1)           ,[ 'test_04_denseCorr.png'              ]);
+    imwrite(tmp_output_grid_all(:,:,:,1)                ,[ 'test_05_grid_warped.png'            ]);
+    imwrite(tmp_output_denseCorr_masked_all(:,:,:,1)    ,[ 'test_06_denseCorr_masked.png'       ]);
     imwrite(tmp_output_denseCorr_multiframe_all(:,:,:,1),[ 'test_06_denseCorr_multiframe.png'   ]);
+    imwrite(tmp_output_digiLum_all(:,:,:,1)             ,[ 'test_06_digiLum.png'                ]);
 % print time 
 toc
 
