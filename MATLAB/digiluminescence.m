@@ -39,10 +39,10 @@ tic
 fprintf('----\n');
 fprintf('Initializing variables \n');
 
-ui8_max = intmax('uint8');
-ui8_hlf = round(intmax('uint8')/2);
-i16_max = intmax('int16');
-i16_2_ui8 = 2^7;
+ui8_max = double(intmax('uint8'));
+ui8_hlf = double(round(intmax('uint8')/2));
+i16_max = double(intmax('int16'));
+i16_2_ui8 = double(2^7);
 
 n_joints            = size(     data_joint_positions_all         , 1         );
 n_frames            = length(   data_timestamps                              );
@@ -71,10 +71,24 @@ tic
 fprintf('----\n');
 fprintf('Creating clean plate for depth data \n');
 
-% out_D_cPlate is an image that represents the background of the scene,
-% which is essentially the maximum depth values found in all frames of the
-% depth data
-output_cleanPlate = max(data_D_all,[],3);
+% out_D_cPlate : an image that represents the background of the scene,
+%   which is essentially the maximum depth values found in all frames of
+%   the depth data
+% To write a new cleanplate:
+%   1) trash the clean plate image "test_02_Depth_cPlate_all.png" and,
+%   2) run this section and it will calculate a new one and save it out in
+%       the project path
+
+if (exist('test_02_Depth_cPlate_all.png', 'file') == 2)
+    % load it
+    output_cleanPlate = int16(imread('test_02_Depth_cPlate_all.png')) * i16_2_ui8;
+else
+    % create a new one
+    output_cleanPlate = max(data_D_all,[],3);
+    % and save it out
+    tmp_output_cleanPlate = uint8(output_cleanPlate / i16_2_ui8 );
+    imwrite(tmp_output_cleanPlate, 'test_02_Depth_cPlate_all.png');
+end
 
 % print time
 toc
@@ -293,7 +307,7 @@ fprintf([' - reformatting data - ']);
         % maximal by default, so you don't need to scale it
         dc_scale = double(2^0);
     end
-    dc_offset = double(0); % ui8_hlf;
+    dc_offset = ui8_hlf; % double(0); % 
     tmp_output_denseCorr_all        = uint8((double(tmp_output_denseCorr_all        ) - dc_offset) * dc_scale + dc_offset);
     tmp_output_masked_denseCorr_all = uint8((double(tmp_output_masked_denseCorr_all ) - dc_offset) * dc_scale + dc_offset);
     %clean up
