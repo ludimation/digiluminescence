@@ -49,8 +49,8 @@ n_frames            = length(   data_timestamps                              );
 
 output_cleanPlate       = zeros(    size(data_D_all(:,:,1))             , 'int16'   );
 output_uMasks_all       = zeros(    size(data_D_all)                    , 'int16'   );
-output_denseCorr_all    = ones(     size(data_C_all)                    , 'uint8'   ) * ui8_hlf;
-output_digiLum_all      = ones(     size(data_C_all)                    , 'uint8'   ) * ui8_hlf;
+output_denseCorr_all    = ones(     size(data_C_all)                    , 'int16'   ) * double(ui8_hlf);
+output_digiLum_all      = ones(     size(data_C_all)                    , 'uint8'   ) * double(ui8_hlf);
 output_grid_all         = zeros(    size(data_C_all)                    , 'uint8'   );
 grid_template           = zeros(    size(output_grid_all(:,:,:,1))      , 'uint8'   );
 output_C_all            = zeros(    size(data_C_all)                    , 'uint8'   );
@@ -205,18 +205,10 @@ fprintf('Creating digiluminescence effect frame by frame \n');
 
 % Mask dense correspondence field with movement mask
 masked_denseCorr_all = uint8( ...
-        (double(output_denseCorr_all) - double(ui8_hlf)) ...
-        .* double(repmat(permute(output_uMasks_all, [1,2,4,3]), [1,1,3,1]) / double(ui8_hlf)) ...
-        + double(ui8_hlf)...
+            double(output_denseCorr_all) ...
+        .*  double(repmat(permute(output_uMasks_all, [1,2,4,3]), [1,1,3,1])) ...
+        /   double(i16_max) ...
     );
-
-% masked_denseCorr_all = output_denseCorr_all ./ uint8(repmat(permute(output_uMasks_all, [1,2,4,3]), [1,1,3,1]) / ui8_hlf);
-% masked_denseCorr_all = masked_denseCorr_all + ui8_hlf;
-% for chan = 1:3
-%     masked_denseCorr_all(:, :, chan, :) = masked_denseCorr_all(:, :, chan, :) ...
-%         ./ ui8_max ...  uint8(permute(output_uMasks_all, [1,2,4,3])) ...
-%     ;
-% end
 
 % create digiLum field from faded, circshifted versions of masked denseCorr
 for iteration = 1:16
@@ -243,7 +235,7 @@ fprintf('Saving out some test files \n');
 tic
 fprintf([' - images - ']);
 % scale dense correspondence
-dc_scale = double(2^2); % turn up coefficient to increase visualcontrast in dense correspondence video
+dc_scale = double(2^3); % turn up coefficient to increase visualcontrast in dense correspondence video
 dc_offset = double(0); % ui8_hlf;
 output_denseCorr_all = (double(output_denseCorr_all) - dc_offset) * dc_scale + dc_offset;
 masked_denseCorr_all = (double(masked_denseCorr_all) - dc_offset) * dc_scale + dc_offset;
@@ -257,7 +249,7 @@ imwrite(uint8( grid_template(:,:,:) )                           ,[ 'test_05_grid
 imwrite(uint8( output_grid_all(:,:,:,1) )                       ,[ 'test_05_grid_warped.png'        ]);
 imwrite(uint8( masked_denseCorr_all(:,:,:,1) )  + ui8_hlf       ,[ 'test_06_denseCorr_masked.png'   ]);
 imwrite(uint8( output_digiLum_all(:,:,:,1) )                    ,[ 'test_06_digiLum.png'            ]);
-% print time
+% print time 
 toc
 
 %%%%%%%%%%%%

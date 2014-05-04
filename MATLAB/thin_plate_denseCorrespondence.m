@@ -109,7 +109,7 @@ i16_max = intmax('int16');
 i16_hlf = int16(i16_max / 2);
 out_denseCorrespondence(:,:,1) = int16(reshape((x_interps(1,:) - xx'), im_sz_wh(1),im_sz_wh(2)));
 out_denseCorrespondence(:,:,2) = int16(reshape((x_interps(2,:) - yy'), im_sz_wh(1),im_sz_wh(2)));
-out_denseCorrespondence(:,:,3) = i16_hlf; % TODO: temporarily storing 50% in this channel, but should eventually include z in dense correspondence calculations
+out_denseCorrespondence(:,:,3) = 0; % TODO: should eventually include z in dense correspondence calculations
 
 if ~no_out_I_interp
     vr = reshape(in_I(:,:,1),n_pix_inputs,1);
