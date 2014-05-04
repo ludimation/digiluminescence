@@ -234,6 +234,9 @@ fprintf([' - videos - reformatting data - ']);
 % must have a [w,h,bitDepth, frames] array for video file writing
 D_all = permute(D_all, [1,2,4,3]);
 out_uMasks_all = permute(out_uMasks_all, [1,2,4,3]);
+% scale dense correspondence
+dc_scale = double(2^4); % turn up coefficient to increase visualcontrast in dense correspondence video
+out_denseCorr_all = (double(out_denseCorr_all) - double(ui8_hlf)) * dc_scale + double(ui8_hlf);
 % IMG must be of one of the following classes: double, single, uint8
 C_all                   = uint8(C_all                               );
 D_all                   = uint8(D_all               / u16_2_ui8     );
