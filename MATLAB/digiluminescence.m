@@ -42,7 +42,7 @@ fprintf('Initializing variables \n');
 ui8_max = intmax('uint8');
 ui8_hlf = round(intmax('uint8')/2);
 i16_max = intmax('int16');
-u16_2_ui8 = 2^7;
+i16_2_ui8 = 2^7;
 
 n_joints            = size(     data_joint_positions_all         , 1         );
 n_frames            = length(   data_timestamps                              );
@@ -270,12 +270,12 @@ tmp_output_denseCorr_all = (double(output_denseCorr_all) - dc_offset) * dc_scale
 tmp_output_masked_denseCorr_all = (double(output_masked_denseCorr_all) - dc_offset) * dc_scale + dc_offset;
 % in grid images
 imwrite( data_C_all(:,:,:,1)                                    ,[ 'test_01_Color.png'              ]);
-imwrite(uint8( data_D_all(:,:,1)                / u16_2_ui8 )   ,[ 'test_02_Depth.png'              ]);
-imwrite(uint8( output_cleanPlate                / u16_2_ui8 )   ,[ 'test_02_Depth_cPlate.png'       ]);
-imwrite(uint8( output_uMasks_all(:,:,1)         / u16_2_ui8 )   ,[ 'test_03_uMask.png'              ]);
 imwrite(uint8( grid_template(:,:,:) )                           ,[ 'test_05_grid_template.png'      ]);
 imwrite(uint8( output_grid_all(:,:,:,1) )                       ,[ 'test_05_grid_warped.png'        ]);
 imwrite(uint8( output_digiLum_all(:,:,:,1) )                    ,[ 'test_06_digiLum.png'            ]);
+imwrite(uint8( data_D_all(:,:,1)                / i16_2_ui8 )           ,[ 'test_02_Depth.png'              ]);
+imwrite(uint8( output_cleanPlate                / i16_2_ui8 )           ,[ 'test_02_Depth_cPlate.png'       ]);
+imwrite(uint8( output_uMasks_all(:,:,1)         / i16_2_ui8 )           ,[ 'test_03_uMask.png'              ]);
 imwrite(uint8( tmp_output_denseCorr_all(:,:,:,1) )  + ui8_hlf           ,[ 'test_04_denseCorr.png'          ]);
 imwrite(uint8( tmp_output_masked_denseCorr_all(:,:,:,1) )  + ui8_hlf    ,[ 'test_06_denseCorr_masked.png'   ]);
 % print time 
