@@ -66,17 +66,6 @@ output_grid_all                 = zeros(    size(data_C_all)                    
 % print time
 toc
 
-%% Draw grids
-tic
-fprintf('----\n');
-fprintf('Drawing grids \n');
-
-% drawGrid (I, spcGrid, spcPoints, color)
-output_grid_all     = drawGrid(output_grid_all     , 32, 1, [ui8_max, ui8_max, 0]); % yellow
-
-% print time
-toc
-
 %% Create a clean plate of the environment
 tic
 fprintf('----\n');
@@ -171,6 +160,18 @@ output_j_features = [ j_endingFeatures; j_startingFeatures];
 clear j_pos_all_reshaped j_pos_all_reshaped_projective
 clear j_pos_all_x j_pos_all_y j_pos_all_z
 clear j_pos_all_x_prjctd j_pos_all_y_prjctd j_pos_all_z_prjctd 
+
+% print time
+toc
+
+%% Draw grids
+tic
+fprintf('----\n');
+fprintf('Drawing grids \n');
+
+% drawGrid (I, spcGrid, spcPoints, color)
+output_grid_all     = zeros(    size(data_C_all)                    , 'uint8'   );
+output_grid_all     = drawGrid(output_grid_all     , 32, 1, [ui8_max, ui8_max, 0]); % yellow
 
 % print time
 toc
