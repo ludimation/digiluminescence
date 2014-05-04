@@ -28,11 +28,11 @@ for i = 1 % For loop is for code collapsing only (so I don't have to look at the
    
 end
 
-% print time
-toc
-
 % clean up
 clear i
+
+% print time
+toc
 
 %% Initialize variables
 tic
@@ -53,6 +53,17 @@ output_denseCorr_all    = ones(     size(data_C_all)                    , 'int16
 output_digiLum_all      = ones(     size(data_C_all)                    , 'uint8'   ) * double(ui8_hlf);
 output_grid_all         = zeros(    size(data_C_all)                    , 'uint8'   );
 output_C_all            = zeros(    size(data_C_all)                    , 'uint8'   );
+% print time
+toc
+
+%% Preallocate output values
+tic
+fprintf('----\n');
+fprintf('Preallocating output values \n');
+
+% print time
+toc
+
 output_masked_denseCorr_all     =           output_denseCorr_all                            ;
 
 %% Draw grids
