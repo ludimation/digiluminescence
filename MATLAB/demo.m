@@ -36,7 +36,7 @@ fprintf('Setting digiluminescence parameters \n');
 
 data_mask_thresh = 256
 data_calcDenseCorr = false;
-data_calcDenseCorr = true; %comment this line out to skip dense correspondence caculcations
+data_calcDenseCorr = true %comment this line out to skip dense correspondence caculcations
 data_n_framesToProcess = 31:32; % 2 frames = smallest test size
 % data_n_framesToProcess = 31:35; % 5 frames
 % data_n_framesToProcess = 31:80; % 50 frames
