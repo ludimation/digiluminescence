@@ -27,6 +27,16 @@ function [ ...
 %     - Check number of inputs / outputs [nargoutchk/narginchk(minargs,
 %     maxargs)]
 
+% TODO: Now
+%   - complete final write-up
+%   - post / burn to CD
+%   - implement with Vivian's data or re-record her data
+%       - save out from openframeworks
+%       - load into MATLAB
+%       - re-run effect rendering on new data
+%   - composite video to display at end of semester show
+%   - update write up with images from vivian's data?
+
 % Start timer
 fprintf('====\n');
 fprintf('Digiluminescence :: Executing\n');
@@ -282,11 +292,15 @@ output_denseCorr_masked_all = int16( ...
         .*  double(repmat(permute(output_uMasks_all, [1,2,4,3]), [1,1,3,1])) ...
         /   double(i16_max) ...
     );
+toc
 
 % create multiframe field from faded, circshifted versions of masked denseCorr
 output_denseCorr_multiframe_all = zeros(    size(output_denseCorr_all)          , 'int16'   );
 i_tmp_max = min(16, n_frames);
 for i_tmp = i_tmp_max:-1:1
+    tic
+    fprintf(['- Circshift ' num2str(i_tmp_max-i_tmp) ' of ' num2str(i_tmp_max) '\n']);
+
     tmp_inds = repmat(permute(output_uMasks_all, [1,2,4,3]), [1,1,3,1]) > 2^4;
     
     % circshift iteration-1 so it starts with current frame
@@ -295,6 +309,8 @@ for i_tmp = i_tmp_max:-1:1
         * ((-((i_tmp-1)/i_tmp_max)+1)^(1/2)) ... y = sqrt(-x+1) easing
         .../iteration_max ... scaled based on maximum number of iterations
         ;
+    %print time
+    toc
 end
 % for i_tmp = 1:i_tmp_max
 %     % circshift iteration-1 so it starts with current frame
