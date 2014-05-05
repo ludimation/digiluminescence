@@ -28,13 +28,15 @@ function [ ...
 %     maxargs)]
 
 % TODO: Now
-%   - complete final write-up
-%   - post / burn to CD
 %   - implement with Vivian's data or re-record her data
 %       - save out from openframeworks
 %       - load into MATLAB
 %       - re-run effect rendering on new data
+%   - add points that remain still at the corners
 %   - composite video to display at end of semester show
+%       - compose audio track
+%   - post / burn to CD
+%   - complete final write-up
 %   - update write up with images from vivian's data?
 
 % Start timer
