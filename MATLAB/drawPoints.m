@@ -45,6 +45,8 @@ function [ I ] = drawPoints(p_array, I, sz_draw, c_rgb)
     y_array = max(min(y_array,size(I, 2)),1);
      
 %     % TODO: 
+%     %   - create a duplicate function for this so that I can clock them
+%     %   against each other
 %     %   - concatenate all arays so sub2in() only has to be called once
 %     %   - create a c_rgb_array that repmats c_rgb correctly so pixel
 %     %   coloring call two steps below only has to be called once
