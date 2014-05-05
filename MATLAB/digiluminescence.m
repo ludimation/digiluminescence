@@ -231,15 +231,15 @@ fprintf('Calculating dense correspondence fields frame by frame \n');
 
 % create dense correspondence fields one frame at a time
 if data_calcDenseCorr
-    for iterator = 1:n_frames
+    for i_frame = 1:n_frames
         tic
-        fprintf([' - frame ' num2str(iterator) ' of ' num2str(n_frames) ' - ']);
+        fprintf([' - frame ' num2str(i_frame) ' of ' num2str(n_frames) ' - ']);
             [ denseCorr, grid ] = thin_plate_denseCorrespondence(...
-                output_j_features(:, :, iterator), ...
-                output_grid_all(:,:,:, iterator) ...
+                output_j_features(:, :, i_frame), ...
+                output_grid_all(:,:,:, i_frame) ...
             );
-            output_denseCorr_all(:,:,:, iterator) = denseCorr;
-            output_grid_all(:,:,:, iterator) = grid;
+            output_denseCorr_all(:,:,:, i_frame) = denseCorr;
+            output_grid_all(:,:,:, i_frame) = grid;
         % print time
         toc
     end
