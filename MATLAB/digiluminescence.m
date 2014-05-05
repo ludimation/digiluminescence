@@ -311,11 +311,11 @@ for i_frame = 1:n_frames
 
     % grab x, y, and u, v for each frame
     tmp_img_source = output_denseCorr_multiframe_all(:,:,:,i_frame);
-    [p1_x, p1_y] = meshgrid(1:size(tmp_img_source,2), 1:size(tmp_img_source, 1));
+    [p1_x, p1_y] = meshgrid(1:size(tmp_img_source,1), 1:size(tmp_img_source, 2));
     p1_x = double(reshape(p1_x, [numel(p1_x), 1]));
     p1_y = double(reshape(p1_y, size(p1_x)));
-    p_dx = double(reshape(tmp_img_source(:,:, 1), size(p1_x)));
-    p_dy = double(reshape(tmp_img_source(:,:, 2), size(p1_x)));
+    p_dx = double(reshape(tmp_img_source(:,:, 1)', size(p1_x)));
+    p_dy = double(reshape(tmp_img_source(:,:, 2)', size(p1_x)));
     p2_x = p1_x + p_dx;
     p2_y = p1_y + p_dy;
     
