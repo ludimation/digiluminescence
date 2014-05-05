@@ -9,30 +9,66 @@ public:
 
 //-- functions and properties which might be useful for recording skeletal data
 //////////////////////
+//ofxOpenNITypes.cpp
+//////////////////////
+//    void ofxOpenNIUser::drawSkeleton() {
+//        ofPushStyle();
+//        // DON'T NEED TO DRAW LIMBS ANYMORE!
+//        //	for(int i = 0; i < limbs.size(); i++){
+//        //		limbs[i].draw();
+//        //	}
+//        for(int i = 0; i < joints.size(); i++){
+//            joints[i].draw();
+//        }
+//        ofPopStyle();
+//    }
+//
+//    ofPixels & ofxOpenNIDepthThreshold::getDepthPixels(){
+//        return depthPixels;
+//    }
+//
+//    ofPixels & ofxOpenNIDepthThreshold::getMaskPixels(){
+//        return maskPixels;
+//    }
+//
+//////////////////////
+//ofxOpenNI.cpp
+//////////////////////
+//    ofPixels& ofxOpenNI::getDepthPixels();
+//    ofPixels& ofxOpenNI::getImagePixels();
+//    xn::UserGenerator& ofxOpenNI::getUserGenerator();
+//    drawSkeletons();
+//    if(g_bIsDepthOn) drawDepth();
+//    if(g_bIsHandsOn) drawHands();
+//    if(g_bIsUserOn) drawSkeletons();
+//    ofTranslate(getWidth(), 0.0f);
+//    if(g_bIsImageOn || g_bIsInfraOn) drawImage();
+// 	currentTrackedUsers[currentTrackedUserIDs[nID]].drawSkeleton();
+//////////////////////
 //ofxOpenNI.h
 //////////////////////
 //    bool setSkeletonProfile(XnSkeletonProfile profile);
 //    XnSkeletonProfile getSkeletonProfile();
 //    xn::UserGenerator& getUserGenerator();
-//	xn::DepthGenerator& getDepthGenerator();
-//  xn::ImageGenerator& getImageGenerator();
-//xn::DepthMetaData& getDepthMetaData();
-//xn::ImageMetaData& getImageMetaData();
+//    xn::DepthGenerator& getDepthGenerator();
+//    xn::ImageGenerator& getImageGenerator();
+//    xn::DepthMetaData& getDepthMetaData();
+//    xn::ImageMetaData& getImageMetaData();
 //    ofEvent<ofxOpenNIUserEvent> userEvent;
 //////////////////////
 //ofxOpenNiUtils.h
 //////////////////////
-// enum Joint
-// enum Limb
-// static inline ofPoint g_worldToProjective(const ofPoint& p)
-// static inline ofPoint g_projectiveToWorld(const ofPoint& p)
-// static inline ofPoint worldToProjective(const XnVector3D& p, xn::DepthGenerator & g_Depth)
-// inline Joint XnToOfJoint(XnSkeletonJoint type)
-// inline string getXNJointAsString(XnSkeletonJoint type)
-// inline string getJointAsString(Joint type)
-// inline string getLimbAsString(Limb type)
-// inline string getUserStatusAsString(UserStatusType type)
-// inline string getCalibrationStatusAsString(XnCalibrationStatus type)
+//    enum Joint
+//    enum Limb
+//    static inline ofPoint g_worldToProjective(const ofPoint& p)
+//    static inline ofPoint g_projectiveToWorld(const ofPoint& p)
+//    static inline ofPoint worldToProjective(const XnVector3D& p, xn::DepthGenerator & g_Depth)
+//    inline Joint XnToOfJoint(XnSkeletonJoint type)
+//    inline string getXNJointAsString(XnSkeletonJoint type)
+//    inline string getJointAsString(Joint type)
+//    inline string getLimbAsString(Limb type)
+//    inline string getUserStatusAsString(UserStatusType type)
+//    inline string getCalibrationStatusAsString(XnCalibrationStatus type)
 //////////////////////
 //ofxOpenNiTypes.h
 //////////////////////
