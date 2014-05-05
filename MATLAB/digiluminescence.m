@@ -110,6 +110,9 @@ else
     imwrite(tmp_output_cleanPlate, 'test_02_Depth_cPlate_all.png');
 end
 
+% clean up
+clear tmp_output_cleanPlate
+
 % print time
 toc
 
@@ -194,6 +197,7 @@ output_j_features = [ j_endingFeatures; j_startingFeatures];
 clear j_pos_all_reshaped j_pos_all_reshaped_projective
 clear j_pos_all_x j_pos_all_y j_pos_all_z
 clear j_pos_all_x_prjctd j_pos_all_y_prjctd j_pos_all_z_prjctd 
+clear j_pos_all_projective j_pos_all_projective_start 
 
 % print time
 toc
@@ -218,7 +222,7 @@ fprintf('Drawing debug joints \n');
 % drawPoints(points, I, size, color)
 output_grid_all = drawPoints(j_startingFeatures, output_grid_all, 16, [ui8_max, ui8_max, 0] ); % yellow
 %TODO: draw limbs in white
-% drawLimbs(j_pos_all_projective, out_grid_all, 4, [ui8_max, ui8_max, 0] ); % yellow
+% drawLimbs(j_startingFeatures, out_grid_all, 4, [ui8_max, ui8_max, 0] ); % yellow
 
 % print time
 toc
@@ -261,7 +265,7 @@ output_grid_all = drawPoints(j_endingFeatures      , output_grid_all, 8, [ui8_ma
 output_grid_all = drawPoints(j_startingFeatures    , output_grid_all, 6, [0       , ui8_max   , ui8_max] ); % cyan
 
 % cleanup
-clear j_pos_all_projective j_pos_all_projective2
+clear j_pos_all_projective2
 clear iterator denseCorr grid
 
 % print time
