@@ -80,7 +80,7 @@ output_uMasks_all               = zeros(    size(data_D_all)                    
 output_denseCorr_all            = ones(     size(data_C_all)                    , 'int16'   ) * double(ui8_hlf);
 output_denseCorr_masked_all     =           output_denseCorr_all                            ;
 output_denseCorr_multiframe_all = zeros(    size(output_denseCorr_all)          , 'int16'   );
-output_digiLum_all              = ones(     size(data_C_all)                    , 'uint8'   ) * double(ui8_hlf);
+output_digiLum_all              = zeros(    size(data_C_all)                    , 'uint8'   );
 output_grid_all                 = zeros(    size(data_C_all)                    , 'uint8'   );
 
 % print time
@@ -233,7 +233,7 @@ fprintf('Calculating dense correspondence fields frame by frame \n');
 if data_calcDenseCorr
     for iterator = 1:n_frames
         tic
-            fprintf([' - frame ' num2str(iterator) ' - ']);
+        fprintf([' - frame ' num2str(iterator) ' of ' num2str(n_frames) ' - ']);
             [ denseCorr, grid ] = thin_plate_denseCorrespondence(...
                 output_j_features(:, :, iterator), ...
                 output_grid_all(:,:,:, iterator) ...
@@ -279,7 +279,7 @@ output_denseCorr_masked_all = int16( ...
         /   double(i16_max) ...
     );
 
-% create digiLum field from faded, circshifted versions of masked denseCorr
+% create multiframe field from faded, circshifted versions of masked denseCorr
 output_denseCorr_multiframe_all = zeros(    size(output_denseCorr_all)          , 'int16'   );
 iteration_max = min(16, n_frames);
 for iteration = 1:iteration_max
@@ -291,13 +291,110 @@ for iteration = 1:iteration_max
         ;
 end
 
-% output_denseCorr_multiframe_all = output_denseCorr_masked_all;
+% print time
+toc
+
+%% Plot lines along dense corresponence field
+tic
+fprintf('- Plotting lines along dense corresponence field - \n');
 
 % TODO: draw lines from 'output_denseCorr_multiframe_all' into 'output_digiLum_all'
-output_digiLum_all = uint8(output_denseCorr_multiframe_all + ui8_hlf);
-output_digiLum_all(:,:,3,:) = ui8_max;
-% Draw colored lines along vectors of the field into the digiluminescence
-% effect output
+output_digiLum_all = zeros( size(data_C_all), 'uint8');
+
+for iterator = 1:n_frames
+    tic
+    fprintf([' - frame ' num2str(iterator) ' of ' num2str(n_frames) ' - \n   - ']);
+
+    % grab x, y, and u, v for each frame
+    tmp_img_source = output_denseCorr_multiframe_all(:,:,:,iterator);
+    [tmp1_x, tmp1_y] = meshgrid(1:size(tmp_img_source,1), 1:size(tmp_img_source, 2));
+    tmp1_x = reshape(tmp1_x, [numel(tmp1_x), 1]);
+    tmp1_y = reshape(tmp1_y, size(tmp1_x));
+    tmp2_x = reshape(tmp_img_source(:,:, 1), size(tmp1_x));
+    tmp2_y = reshape(tmp_img_source(:,:, 2), size(tmp1_x));
+    
+    lines_to_skip = double(tmp2_x.^2 + tmp2_y.^2).^(1/2) < 8;
+    
+%     tmp1_x_size = size(tmp1_x)
+%     tmp1_y_size = size(tmp1_y)
+%     tmp2_x_size = size(tmp2_x)
+%     tmp2_y_size = size(tmp2_y)
+    
+    % capture instance of the image to be drawn over
+    tmp_img_target = output_digiLum_all(:,:,:,iterator);
+
+    % debug
+    imshow(tmp_img_target)
+    
+    for line_i = 1:numel(tmp1_x)
+        if lines_to_skip(line_i)
+            continue
+        end
+        
+        fprintf(['l ' num2str(line_i) ' of ' num2str(numel(tmp1_x)) ' - ']);
+        
+        %// Draw lines from p1 to p2 on matrix tmp_ing_target
+        % x = p1(1):p2(1)
+        tmp_line_x = min(tmp1_x(line_i),tmp2_x(line_i)):max(tmp1_x(line_i),tmp2_x(line_i));
+        tmp_line_x = reshape(tmp_line_x, [numel(tmp_line_x), 1]);
+
+        % round((x - p1(1)) * (p2(2) - p1(2)) / (p2(1) - p1(1)) + p1(2));
+        tmp_line_y = reshape(...
+                                round(...
+                                          (tmp_line_x - tmp1_x(line_i)) ...
+                                        * (tmp2_y(line_i) - tmp1_y(line_i)) ...
+                                        / (tmp2_x(line_i) - tmp1_x(line_i)) ...
+                                        + tmp1_y(line_i) ...
+                                    )...
+                                , size(tmp_line_x)...
+                      ); ...
+                      % ;
+        tmp_line_xxx = repmat(tmp_line_x, [3, 1]);
+        tmp_line_yyy = repmat(tmp_line_y, [3, 1]);
+        tmp_chan = reshape(...
+                            repmat(...
+                                [1,2,3], ...
+                                [numel(tmp_line_x), 1]), ...
+                            size(tmp_line_xxx) ...
+                        );
+                    
+        % clamp tmp_line_xxx and tmp_line_yyy to indexes withing image bounds
+        tmp_line_xxx = max(min(tmp_line_xxx,size(tmp_img_target, 1)),1);
+        tmp_line_yyy = max(min(tmp_line_yyy,size(tmp_img_target, 2)),1);
+        
+        % re-cast as doubles (otherwise, sub2ind() will throw a data type
+        % error... not sure why)
+        tmp_line_xxx    = double(tmp_line_xxx);
+        tmp_line_yyy    = double(tmp_line_yyy);
+        tmp_chan        = double(tmp_chan);
+        
+        % draw white into the indexes
+        % m(sub2ind(size(m), y, x, channel)) = 1;
+        inds = sub2ind(size(tmp_img_target), tmp_line_xxx, tmp_line_yyy, tmp_chan);
+        tmp_img_target(inds) = ui8_max;
+    end
+    
+    % Draw colored lines along vectors of the field into the digiluminescence
+    % effect output
+    output_digiLum_all(:,:,:,iterator) = tmp_img_target;
+    
+    % debug
+    imshow(tmp_img_target);
+    
+    % print time
+    fprintf('\n')
+    toc
+end
+% %test with quiver plot
+% quiver(tmp1_x, tmp1_y, tmp2_x, tmp2_y, ...
+%     1, ... scale
+%     '-','filled', ... linespec, markerfilling
+%     'Linewidth',1, 'MarkerSize',1); % other properties
+
+% %% Assign plots to digilum effect
+% % TODO: replace these hack values for digilum effect
+% output_digiLum_all = uint8(output_denseCorr_multiframe_all + ui8_hlf);
+% output_digiLum_all(:,:,3,:) = ui8_max;
 
 % clean up
 clear iteration*
