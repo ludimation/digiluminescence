@@ -286,8 +286,8 @@ for iteration = 1:iteration_max
     % circshift iteration-1 so it starts with current frame
     output_denseCorr_multiframe_all = output_denseCorr_multiframe_all ...
         + circshift(output_denseCorr_masked_all, [1,1,1,iteration - 1] ) ...
-        * ((-((iteration-1)/iteration_max)+1)^(1/2))...
-        .../iteration_max ... y = sqrt(-x+1) easing
+        * ((-((iteration-1)/iteration_max)+1)^(1/2)) ... y = sqrt(-x+1) easing
+        /iteration_max ... scaled based on maximum number of iterations
         ;
 end
 
@@ -301,62 +301,67 @@ fprintf('- Plotting lines along dense corresponence field - \n');
 % TODO: draw lines from 'output_denseCorr_multiframe_all' into 'output_digiLum_all'
 output_digiLum_all = zeros( size(data_C_all), 'uint8');
 
-for iterator = 1:n_frames
+for i_frame = 1:n_frames
     tic
-    fprintf([' - frame ' num2str(iterator) ' of ' num2str(n_frames) ' - \n   - ']);
+    fprintf([' - frame ' num2str(i_frame) ' of ' num2str(n_frames) ' - \n   - ']);
 
     % grab x, y, and u, v for each frame
-    tmp_img_source = output_denseCorr_multiframe_all(:,:,:,iterator);
-    [tmp1_x, tmp1_y] = meshgrid(1:size(tmp_img_source,1), 1:size(tmp_img_source, 2));
-    tmp1_x = reshape(tmp1_x, [numel(tmp1_x), 1]);
-    tmp1_y = reshape(tmp1_y, size(tmp1_x));
-    tmp2_x = reshape(tmp_img_source(:,:, 1), size(tmp1_x));
-    tmp2_y = reshape(tmp_img_source(:,:, 2), size(tmp1_x));
+    tmp_img_source = output_denseCorr_multiframe_all(:,:,:,i_frame);
+    [p1_x, p1_y] = meshgrid(1:size(tmp_img_source,1), 1:size(tmp_img_source, 2));
+    p1_x = reshape(p1_x, [numel(p1_x), 1]);
+    p1_y = reshape(p1_y, size(p1_x));
+    p_dx = reshape(tmp_img_source(:,:, 1), size(p1_x));
+    p_dy = reshape(tmp_img_source(:,:, 2), size(p1_x));
+    p2_x = p1_x + p_dx;
+    p2_y = p1_y + p_dy;
     
-    lines_to_skip = double(tmp2_x.^2 + tmp2_y.^2).^(1/2) < 8;
+    % create logical array of lines whose magnitude is very small
+    lines_to_skip = double(p_dx.^2 + p_dy.^2).^(1/2) < 4;
     
-%     tmp1_x_size = size(tmp1_x)
-%     tmp1_y_size = size(tmp1_y)
-%     tmp2_x_size = size(tmp2_x)
-%     tmp2_y_size = size(tmp2_y)
-    
-    % capture instance of the image to be drawn over
-    tmp_img_target = output_digiLum_all(:,:,:,iterator);
+    % capture instance of the image to be drawn into
+    tmp_img_target = output_digiLum_all(:,:,:,i_frame);
 
-    % debug
-    imshow(tmp_img_target)
+%     % debug
+%     imshow(tmp_img_target)
     
-    for line_i = 1:numel(tmp1_x)
-        if lines_to_skip(line_i)
+    for i_line = 1:numel(p1_x)
+        if lines_to_skip(i_line)
             continue
         end
-        
-        fprintf(['l ' num2str(line_i) ' of ' num2str(numel(tmp1_x)) ' - ']);
+        fprintf(['l ' num2str(i_line) ' of ' num2str(numel(p1_x)) ' - ']);
         
         %// Draw lines from p1 to p2 on matrix tmp_ing_target
         % x = p1(1):p2(1)
-        tmp_line_x = min(tmp1_x(line_i),tmp2_x(line_i)):max(tmp1_x(line_i),tmp2_x(line_i));
-        tmp_line_x = reshape(tmp_line_x, [numel(tmp_line_x), 1]);
+        line_x =    min(p1_x(i_line), p2_x(i_line))...
+                    : ...
+                    max(p1_x(i_line), p2_x(i_line));
+        line_x = reshape(line_x, [numel(line_x), 1]);
 
-        % round((x - p1(1)) * (p2(2) - p1(2)) / (p2(1) - p1(1)) + p1(2));
-        tmp_line_y = reshape(...
-                                round(...
-                                          (tmp_line_x - tmp1_x(line_i)) ...
-                                        * (tmp2_y(line_i) - tmp1_y(line_i)) ...
-                                        / (tmp2_x(line_i) - tmp1_x(line_i)) ...
-                                        + tmp1_y(line_i) ...
-                                    )...
-                                , size(tmp_line_x)...
-                      ); ...
-                      % ;
-        tmp_line_xxx = repmat(tmp_line_x, [3, 1]);
-        tmp_line_yyy = repmat(tmp_line_y, [3, 1]);
+        % round((x - p1(1)) * p_dy / p_dx + p1(2));
+        line_y = round(...
+                              (line_x - p1_x(i_line)) ...
+                            * p_dy(i_line) ...
+                            / p_dx(i_line) ...
+                            + p1_y(i_line) ...
+                        )...
+                    , size(line_x)...
+                  ); ...
+                  
+        tmp_line_xxx = repmat(line_x, [3, 1]);
+        tmp_line_yyy = repmat(line_y, [3, 1]);
         tmp_chan = reshape(...
                             repmat(...
                                 [1,2,3], ...
-                                [numel(tmp_line_x), 1]), ...
+                                [numel(line_x), 1]), ...
                             size(tmp_line_xxx) ...
                         );
+        tmp_rgb = reshape(...
+                            repmat(...
+                                    [0, round(ui8_half/2), ui8_max], ... TODO: make this color user-settable
+                                    [size(line_x)] ...
+                                ), ...
+                            size(tmp_line_xxx)...
+                        ) ;
                     
         % clamp tmp_line_xxx and tmp_line_yyy to indexes withing image bounds
         tmp_line_xxx = max(min(tmp_line_xxx,size(tmp_img_target, 1)),1);
@@ -371,12 +376,12 @@ for iterator = 1:n_frames
         % draw white into the indexes
         % m(sub2ind(size(m), y, x, channel)) = 1;
         inds = sub2ind(size(tmp_img_target), tmp_line_xxx, tmp_line_yyy, tmp_chan);
-        tmp_img_target(inds) = ui8_max;
+        tmp_img_target(inds) = tmp_rgb(inds);
     end
     
-    % Draw colored lines along vectors of the field into the digiluminescence
+    % Draw lines along vectors of the field into the digiluminescence
     % effect output
-    output_digiLum_all(:,:,:,iterator) = tmp_img_target;
+    output_digiLum_all(:,:,:,i_frame) = tmp_img_target;
     
     % debug
     imshow(tmp_img_target);
