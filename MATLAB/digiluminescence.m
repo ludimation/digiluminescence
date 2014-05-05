@@ -79,7 +79,7 @@ output_cleanPlate               = zeros(    size(data_D_all(:,:,1))             
 output_uMasks_all               = zeros(    size(data_D_all)                    , 'int16'   );
 output_denseCorr_all            = ones(     size(data_C_all)                    , 'int16'   ) * double(ui8_hlf);
 output_denseCorr_masked_all     =           output_denseCorr_all                            ;
-output_denseCorr_multiframe_all =           output_denseCorr_all                            ;
+output_denseCorr_multiframe_all = zeros(    size(output_denseCorr_all)          , 'int16'   );
 output_digiLum_all              = ones(     size(data_C_all)                    , 'uint8'   ) * double(ui8_hlf);
 output_grid_all                 = zeros(    size(data_C_all)                    , 'uint8'   );
 
@@ -273,25 +273,29 @@ fprintf('----\n');
 fprintf('Creating digiluminescence effect frame by frame \n');
 
 % Mask dense correspondence field with movement mask
-output_denseCorr_masked_all = uint8( ...
+output_denseCorr_masked_all = int16( ...
             double(output_denseCorr_all) ...
         .*  double(repmat(permute(output_uMasks_all, [1,2,4,3]), [1,1,3,1])) ...
         /   double(i16_max) ...
     );
 
 % create digiLum field from faded, circshifted versions of masked denseCorr
-iteration_max = 16;
+output_denseCorr_multiframe_all = zeros(    size(output_denseCorr_all)          , 'int16'   );
+iteration_max = min(16, n_frames);
 for iteration = 1:iteration_max
     % circshift iteration-1 so it starts with current frame
     output_denseCorr_multiframe_all = output_denseCorr_multiframe_all ...
         + circshift(output_denseCorr_masked_all, [1,1,1,iteration - 1] ) ...
-        * (-((iteration-1)/iteration_max)+1)^(1/2) ... y = sqrt(-x+1) easing
+        * ((-((iteration-1)/iteration_max)+1)^(1/2))...
+        .../iteration_max ... y = sqrt(-x+1) easing
         ;
 end
 
-% TODO: draw lines from 'output_denseCorr_multiframe_all' into 'output_digiLum_all'
-output_digiLum_all = output_denseCorr_multiframe_all;
+% output_denseCorr_multiframe_all = output_denseCorr_masked_all;
 
+% TODO: draw lines from 'output_denseCorr_multiframe_all' into 'output_digiLum_all'
+output_digiLum_all = uint8(output_denseCorr_multiframe_all + ui8_hlf);
+output_digiLum_all(:,:,3,:) = ui8_max;
 % Draw colored lines along vectors of the field into the digiluminescence
 % effect output
 
@@ -308,20 +312,7 @@ fprintf('Saving out some test files \n');
 % reformat data
 tic
 fprintf([' - reformatting data - ']);
-    % IMG data must be of one of the following classes: double, single, uint8
-    tmp_data_C_all                      = uint8(data_C_all                              )               ;
-    tmp_data_D_all                      = uint8(data_D_all              / i16_2_ui8     )               ;
-    tmp_output_cleanPlate               = uint8(output_cleanPlate       / i16_2_ui8     )               ;
-    tmp_output_uMasks_all               = uint8(output_uMasks_all       / i16_2_ui8     )               ;
-    tmp_output_denseCorr_all            = uint8(output_denseCorr_all                    )   + ui8_hlf   ;
-    tmp_output_grid_all                 = uint8(output_grid_all                         )               ;
-    tmp_output_denseCorr_masked_all     = uint8(output_denseCorr_masked_all             )   + ui8_hlf   ;
-    tmp_output_denseCorr_multiframe_all = uint8(output_denseCorr_multiframe_all         )   + ui8_hlf   ;
-    tmp_output_digiLum_all              = uint8(output_digiLum_all                      )               ;
-    % must have a [w,h,bitDepth, frames] array for video file writing
-    tmp_data_D_all = permute(tmp_data_D_all, [1,2,4,3]);
-    tmp_output_uMasks_all = permute(tmp_output_uMasks_all, [1,2,4,3]);
-    % scale dense correspondence for visibility
+    % set up scale and translate variables used later on for dense correspondence visibility
     if data_calcDenseCorr
         % turn up coefficient to increase visualcontrast in dense
         % correspondence data
@@ -331,10 +322,24 @@ fprintf([' - reformatting data - ']);
         % maximal by default, so you don't need to scale it
         dc_scale = double(2^0);
     end
-    dc_offset = ui8_hlf; % double(0); % 
+    dc_offset = double(0); % ui8_hlf; % 
+    % IMG data must be of one of the following classes: double, single, uint8
+%     tmp_data_C_all                      = uint8(data_C_all                              )               ;
+%     tmp_data_D_all                      = uint8(data_D_all              / i16_2_ui8     )               ;
+    tmp_output_cleanPlate               = uint8(output_cleanPlate       / i16_2_ui8     )               ;
+    tmp_output_uMasks_all               = uint8(output_uMasks_all       / i16_2_ui8     )               ;
+    tmp_output_denseCorr_all            = uint8(output_denseCorr_all                    )   + dc_offset ;
+    tmp_output_grid_all                 = uint8(output_grid_all                         )               ;
+    tmp_output_denseCorr_masked_all     = uint8(output_denseCorr_masked_all             )   + dc_offset ;
+    tmp_output_denseCorr_multiframe_all = uint8(output_denseCorr_multiframe_all         )   + dc_offset ;
+    tmp_output_digiLum_all              = uint8(output_digiLum_all                      )               ;
+    % must have a [w,h,bitDepth, frames] array for video file writing
+%     tmp_data_D_all = permute(tmp_data_D_all, [1,2,4,3]);
+    tmp_output_uMasks_all = permute(tmp_output_uMasks_all, [1,2,4,3]);
+    % scale and translate dense correspondence for visibility
     tmp_output_denseCorr_all            = uint8((double(tmp_output_denseCorr_all            ) - dc_offset) * dc_scale + dc_offset);
     tmp_output_denseCorr_masked_all     = uint8((double(tmp_output_denseCorr_masked_all     ) - dc_offset) * dc_scale + dc_offset);
-    tmp_output_denseCorr_multiframe_all = uint8((double(tmp_output_denseCorr_multiframe_all ) - dc_offset) * dc_scale + dc_offset);
+%     tmp_output_denseCorr_multiframe_all = uint8((double(tmp_output_denseCorr_multiframe_all ) - dc_offset) * dc_scale + dc_offset);
     %clean up
     clear dc_*
 % print time
@@ -346,8 +351,8 @@ toc
 tic
 fprintf([' - images - ']);
     % save out images
-    imwrite(tmp_data_C_all(:,:,:,1)                     ,[ 'test_01_Color.png'                  ]);
-    imwrite(tmp_data_D_all(:,:,:,1)                     ,[ 'test_02_Depth.png'                  ]);
+%     imwrite(tmp_data_C_all(:,:,:,1)                     ,[ 'test_01_Color.png'                  ]);
+%     imwrite(tmp_data_D_all(:,:,:,1)                     ,[ 'test_02_Depth.png'                  ]);
     imwrite(tmp_output_cleanPlate                       ,[ 'test_02_Depth_cPlate.png'           ]);
     imwrite(tmp_output_uMasks_all(:,:,:,1)              ,[ 'test_03_uMask.png'                  ]);
     imwrite(tmp_output_denseCorr_all(:,:,:,1)           ,[ 'test_04_denseCorr.png'              ]);
@@ -362,25 +367,25 @@ toc
 % videos
 %%%%%%%%%%%%
 
-% data_C_all
-tic
-fprintf([' - videos - data_C_all - ']);
-    writerObj = VideoWriter(['test_01_Color.mp4'], 'MPEG-4');
-    open(writerObj);
-    writeVideo(writerObj,tmp_data_C_all)
-    close(writerObj);
-% print time
-toc
-
-% data_D_all
-tic
-fprintf([' - videos - data_D_all - ']);
-    writerObj = VideoWriter(['test_02_Depth.mp4'], 'MPEG-4');
-    open(writerObj);
-    writeVideo(writerObj,tmp_data_D_all)
-    close(writerObj);
-% print time
-toc
+% % data_C_all
+% tic
+% fprintf([' - videos - data_C_all - ']);
+%     writerObj = VideoWriter(['test_01_Color.mp4'], 'MPEG-4');
+%     open(writerObj);
+%     writeVideo(writerObj,tmp_data_C_all)
+%     close(writerObj);
+% % print time
+% toc
+% 
+% % data_D_all
+% tic
+% fprintf([' - videos - data_D_all - ']);
+%     writerObj = VideoWriter(['test_02_Depth.mp4'], 'MPEG-4');
+%     open(writerObj);
+%     writeVideo(writerObj,tmp_data_D_all)
+%     close(writerObj);
+% % print time
+% toc
 
 % output_uMasks_all
 tic
