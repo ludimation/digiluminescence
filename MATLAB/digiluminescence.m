@@ -1,5 +1,6 @@
 function [ ...
     output_C_all, ...
+    output_D_all, ...
     output_cleanPlate, ...
     output_uMasks_all, ...
     output_j_features, ...
@@ -115,6 +116,8 @@ fprintf('Creating clean plate for depth data \n');
 %   2) run this section  by itself, and it will calculate a new one and
 %       save it out in the project path
 
+tmp_recalc_cleanPlate = false;
+
 if (...
         exist('test_02_Depth_cPlate_all.png'    , 'file') == 2 ...
     &&  exist('test_02_Depth_cPlate_max.png'    , 'file') == 2 ...
@@ -123,16 +126,31 @@ if (...
     )
     % load it
     output_cleanPlate = int16(imread('test_02_Depth_cPlate_all.png')) * i16_2_ui8;
-else % create a new one
-    % calculate max, mean, and median
-    tic; fprintf(' - tmp_output_cleanPlate_max ');
-        tmp_output_cleanPlate_max = max(data_D_all,[],3); % fast (close second)
+    
+else % otherwise, create a new one
+    tmp_recalc_cleanPlate = true;
+end
+
+% calculate max
+tic; fprintf(' - tmp_output_cleanPlate_max - ');
+    tmp_output_cleanPlate_max = max(data_D_all,[],3); % fast (close second)
+toc
+
+% use max to create clean_Data_D_all
+tic; fprintf(' - cleaning output_D_all - ');
+    % create clean depth images by putting cPlate in areas that have no value
+    tmp_inds_positive               = data_D_all > -8;
+    output_D_all                    = repmat(tmp_output_cleanPlate_max, [1,1,size(data_D_all,3)]);
+    output_D_all(tmp_inds_positive) = data_D_all(tmp_inds_positive);
+toc
+
+if tmp_recalc_cleanPlate
+    % calculate means and medians from clean depth data
+    tic; fprintf(' - tmp_output_cleanPlate_mean - ');
+        tmp_output_cleanPlate_mean = mean(output_D_all,3); % fastest
     toc    
-    tic; fprintf(' - tmp_output_cleanPlate_mean ');
-        tmp_output_cleanPlate_mean = mean(data_D_all,3); % fastest
-    toc    
-    tic; fprintf(' - tmp_output_cleanPlate_median ');
-        tmp_output_cleanPlate_median = median(data_D_all,3); % much slower
+    tic; fprintf(' - tmp_output_cleanPlate_median - ');
+        tmp_output_cleanPlate_median = median(output_D_all,3); % much slower
     toc
     % use their average (mean) for the mask to mimize noise in the user
     % mask calcs later on
@@ -142,8 +160,8 @@ else % create a new one
                                 tmp_output_cleanPlate_median  ...
                             ]);
     tmp_output_cleanPlate_all = reshape(tmp_output_cleanPlate_all, [n_width, n_height, 3]);
-    output_cleanPlate = mean(tmp_output_cleanPlate_all, 3);
-    %     output_cleanPlate = tmp_output_cleanPlate_max   ;
+    %     output_cleanPlate = mean(tmp_output_cleanPlate_all, 3);
+    output_cleanPlate = tmp_output_cleanPlate_max   ;
     %     output_cleanPlate = tmp_output_cleanPlate_mean  ;
     %     output_cleanPlate = tmp_output_cleanPlate_median;
     % save out all files for comparison
@@ -152,6 +170,7 @@ else % create a new one
     imwrite( uint8( tmp_output_cleanPlate_mean      / i16_2_ui8 ), 'test_02_Depth_cPlate_mean.png'   );
     imwrite( uint8( tmp_output_cleanPlate_median    / i16_2_ui8 ), 'test_02_Depth_cPlate_median.png' );
 end
+
 
 % clean up
 clear tmp_*
@@ -168,23 +187,17 @@ fprintf('Creating user masks \n');
 % each depth image that varies from the previously calculated cleanplate,
 % out_D_cPlate
 
-% clean up depth images by putting cPlate in areas that have no value
-inds_positive               = data_D_all > -8; 
-D_all_cPlate                = repmat(output_cleanPlate, [1,1,size(data_D_all,3)]);
-D_all_clean                 = D_all_cPlate;
-D_all_clean(inds_positive)  = data_D_all(inds_positive);
 % calculate masks for areas with large differences between the clean Depth
 % image and the cleanPlate
-D_all_diff                  = abs(D_all_clean - D_all_cPlate);
-inds_BG                     = abs(D_all_diff) < data_mask_thresh;
-output_uMasks_all           = D_all_clean;
-output_uMasks_all(inds_BG)  = i16_max;
+tmp_D_all_diff                  = abs(output_D_all - repmat(output_cleanPlate, [1,1,size(data_D_all,3)]));
+tmp_inds_BG                     = abs(tmp_D_all_diff) < data_mask_thresh;
+output_uMasks_all               = output_D_all;
+output_uMasks_all(tmp_inds_BG)  = i16_max;
 % invert the mask so it can be used as a scalar later
 output_uMasks_all = i16_max - output_uMasks_all;
 
 % clean up
-clear inds_positive inds_BG
-clear D_all_cPlate D_all_clean D_all_diff
+clear tmp_*
 
 % print time
 toc
@@ -501,17 +514,45 @@ fprintf([' - videos - output_C_all - ']);
 % print time
 toc
 
+%% output_D_all
+
+tic
+fprintf(['     ---- \n'])
+fprintf(['     > reformatting data - output_D_all']);
+    tmp_output_D_all = uint8(output_D_all / i16_2_ui8 );
+    % must have a [w,h,bitDepth, frames] array for video file writing
+    tmp_output_D_all = permute(tmp_output_D_all, [1,2,4,3]);
+% print time
+toc
+tic
+fprintf(['     > saving images - ']);
+    % save out images
+    imwrite(tmp_output_D_all(:,:,:,1), [ 'test_02_Depth_ouput.png' ]);
+% print time
+toc
+
+% output_D_all
+tic
+fprintf(['     > saving video - output_D_all - ']);
+    writerObj = VideoWriter(['test_02_Depth_ouput.mp4'], 'MPEG-4');
+    open(writerObj);
+    writeVideo(writerObj,tmp_output_D_all)
+    close(writerObj);
+% print time
+toc
+
+
 %% output_cleanPlate
 tic
 fprintf(['     ---- \n'])
 fprintf(['     > reformatting data - output_cleanPlate']);
-    tmp_output_cleanPlate               = uint8(output_cleanPlate       / i16_2_ui8     )               ;
+    tmp_output_cleanPlate = uint8(output_cleanPlate / i16_2_ui8 );
 % print time
 toc
 
 tic
 fprintf(['     > saving image - ']);
-    imwrite(tmp_output_cleanPlate                       ,[ 'test_02_Depth_cPlate.png'           ]);
+    imwrite(tmp_output_cleanPlate, [ 'test_02_Depth_cPlate.png' ]);
 % print time 
 toc
 
@@ -660,23 +701,23 @@ tic
 fprintf(['     ---- \n'])
 fprintf(['     > reformatting data - data_C_all, data_D_all']);
     tmp_data_C_all = uint8(data_C_all );
-    tmp_data_D_all = uint8(data_D_all / i16_2_ui8 );
+    tmp_output_D_all = uint8(data_D_all / i16_2_ui8 );
     % must have a [w,h,bitDepth, frames] array for video file writing
-    tmp_data_D_all = permute(tmp_data_D_all, [1,2,4,3]);
+    tmp_output_D_all = permute(tmp_output_D_all, [1,2,4,3]);
 % print time
 toc
 tic
 fprintf(['     > saving images - ']);
     % save out images
-    imwrite(tmp_data_C_all(:,:,:,1), [ 'test_01_Color.png' ]);
-    imwrite(tmp_data_D_all(:,:,:,1), [ 'test_02_Depth.png' ]);
+    imwrite(tmp_data_C_all(:,:,:,1), [ 'test_01_Color_data.png' ]);
+    imwrite(tmp_output_D_all(:,:,:,1), [ 'test_02_Depth_data.png' ]);
 % print time
 toc
 
 % data_C_all
 tic
 fprintf(['     > saving video - data_C_all - ']);
-    writerObj = VideoWriter(['test_01_Color.mp4'], 'MPEG-4');
+    writerObj = VideoWriter(['test_01_Color_data.mp4'], 'MPEG-4');
     open(writerObj);
     writeVideo(writerObj,tmp_data_C_all)
     close(writerObj);
@@ -686,9 +727,9 @@ toc
 % data_D_all
 tic
 fprintf(['     > saving video - data_D_all - ']);
-    writerObj = VideoWriter(['test_02_Depth.mp4'], 'MPEG-4');
+    writerObj = VideoWriter(['test_02_Depth_data.mp4'], 'MPEG-4');
     open(writerObj);
-    writeVideo(writerObj,tmp_data_D_all)
+    writeVideo(writerObj,tmp_output_D_all)
     close(writerObj);
 % print time
 toc
