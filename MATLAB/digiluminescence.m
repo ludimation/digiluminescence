@@ -311,14 +311,21 @@ for i_frame = 1:n_frames
 
     % grab x, y, and u, v for each frame
     tmp_img_source = output_denseCorr_multiframe_all(:,:,:,i_frame);
-    [p1_x, p1_y] = meshgrid(1:size(tmp_img_source,1), 1:size(tmp_img_source, 2));
-    p1_x = reshape(p1_x, [numel(p1_x), 1]);
-    p1_y = reshape(p1_y, size(p1_x));
-    p_dx = reshape(tmp_img_source(:,:, 1), size(p1_x));
-    p_dy = reshape(tmp_img_source(:,:, 2), size(p1_x));
+    [p1_x, p1_y] = meshgrid(1:size(tmp_img_source,2), 1:size(tmp_img_source, 1));
+    p1_x = double(reshape(p1_x, [numel(p1_x), 1]));
+    p1_y = double(reshape(p1_y, size(p1_x)));
+    p_dx = double(reshape(tmp_img_source(:,:, 1), size(p1_x)));
+    p_dy = double(reshape(tmp_img_source(:,:, 2), size(p1_x)));
     p2_x = p1_x + p_dx;
     p2_y = p1_y + p_dy;
     
+%     p1_x = [120, 240, 360]'
+%     p1_y = [160, 320, 480]'
+%     p_dx = [-20, 10, -40]'
+%     p_dy = [-20, -40, 10]'
+%     p2_x = p1_x + p_dx;
+%     p2_y = p1_y + p_dy;
+
     % create logical array of lines whose magnitude is very small
     lines_to_skip = double(p_dx.^2 + p_dy.^2).^(1/2) < 4;
     
@@ -347,9 +354,7 @@ for i_frame = 1:n_frames
                             * p_dy(i_line) ...
                             / p_dx(i_line) ...
                             + p1_y(i_line) ...
-                        )...
-                    , size(line_x)...
-                  ); ...
+                    ); ...
                   
         tmp_line_xxx = repmat(line_x, [3, 1]);
         tmp_line_yyy = repmat(line_y, [3, 1]);
@@ -361,7 +366,7 @@ for i_frame = 1:n_frames
                         );
         tmp_rgb = reshape(...
                             repmat(...
-                                    [0, round(ui8_half/2), ui8_max], ... TODO: make this color user-settable
+                                    [0, round(ui8_hlf/2), ui8_max], ... TODO: make this color user-settable
                                     size(line_x) ...
                                 ), ...
                             size(tmp_line_xxx)...
@@ -377,10 +382,10 @@ for i_frame = 1:n_frames
         tmp_line_yyy    = double(tmp_line_yyy);
         tmp_chan        = double(tmp_chan);
         
-        % draw white into the indexes
+        % draw color into the indexes
         % m(sub2ind(size(m), y, x, channel)) = 1;
         inds = sub2ind(size(tmp_img_target), tmp_line_xxx, tmp_line_yyy, tmp_chan);
-        tmp_img_target(inds) = tmp_rgb(inds);
+        tmp_img_target(inds) = tmp_rgb;
     end
     
     % Draw lines along vectors of the field into the digiluminescence
