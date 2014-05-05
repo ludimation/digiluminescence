@@ -131,7 +131,7 @@ void testApp::draw(){
     ofPushMatrix();
     
     openNIRecorder.drawDebug(0, 0);
-    openNIPlayer.drawDebug(0, 480);
+    openNIPlayer.drawDebug(0, 240);
 
     ofPushMatrix();
     
