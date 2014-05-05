@@ -385,16 +385,7 @@ for iterator = 1:n_frames
     fprintf('\n')
     toc
 end
-% %test with quiver plot
-% quiver(tmp1_x, tmp1_y, tmp2_x, tmp2_y, ...
-%     1, ... scale
-%     '-','filled', ... linespec, markerfilling
-%     'Linewidth',1, 'MarkerSize',1); % other properties
 
-% %% Assign plots to digilum effect
-% % TODO: replace these hack values for digilum effect
-% output_digiLum_all = uint8(output_denseCorr_multiframe_all + ui8_hlf);
-% output_digiLum_all(:,:,3,:) = ui8_max;
 
 % clean up
 clear iteration*
