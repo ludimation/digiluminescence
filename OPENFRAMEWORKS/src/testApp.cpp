@@ -109,7 +109,10 @@ void testApp::setup() {
     openNIRecorder.start();
 
     openNIPlayer.setup();
+    openNIPlayer.setRegister(true);
+    openNIPlayer.setMirror(true);
     openNIPlayer.addUserGenerator();
+    openNIPlayer.setMaxNumUsers(2);
 	openNIPlayer.start();
     
     verdana.loadFont(ofToDataPath("verdana.ttf"), 24);
