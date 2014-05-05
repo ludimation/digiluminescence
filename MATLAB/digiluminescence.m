@@ -446,9 +446,74 @@ toc
 fprintf('----\n');
 fprintf('Saving out some test files \n');
 
-% reformat data
+%% output_C_all
 tic
-fprintf([' - reformatting data - ']);
+fprintf(['     ---- \n'])
+fprintf(['     > reformatting data - output_C_all']);
+    % IMG data must be of one of the following classes: double, single, uint8
+    tmp_output_C_all                    = uint8(output_C_all                            )               ;
+% print time
+toc
+
+tic
+fprintf(['     > saving image - ']);
+    imwrite(tmp_output_C_all(:,:,:,1)                   ,[ 'test_07_Color_ouput.png'            ]);
+% print time 
+toc
+
+tic
+fprintf([' - videos - output_C_all - ']);
+    writerObj = VideoWriter(['test_07_Color_ouput.mp4'], 'MPEG-4');
+    open(writerObj);
+    writeVideo(writerObj,tmp_output_C_all)
+    close(writerObj);
+% print time
+toc
+
+%% output_cleanPlate
+tic
+fprintf(['     ---- \n'])
+fprintf(['     > reformatting data - output_cleanPlate']);
+    tmp_output_cleanPlate               = uint8(output_cleanPlate       / i16_2_ui8     )               ;
+% print time
+toc
+
+tic
+fprintf(['     > saving image - ']);
+    imwrite(tmp_output_cleanPlate                       ,[ 'test_02_Depth_cPlate.png'           ]);
+% print time 
+toc
+
+%% output_uMasks_all
+tic
+fprintf(['     ---- \n'])
+fprintf(['     > reformatting data - output_uMasks_all']);
+    % IMG data must be of one of the following classes: double, single, uint8
+    tmp_output_uMasks_all = uint8(output_uMasks_all / i16_2_ui8 );
+    % must have a [w,h,bitDepth, frames] array for video file writing
+    tmp_output_uMasks_all = permute(tmp_output_uMasks_all, [1,2,4,3]);
+% print time
+toc
+tic
+fprintf(['     > saving image - ']);
+    imwrite(tmp_output_uMasks_all(:,:,:,1)              ,[ 'test_03_uMask.png'                  ]);
+% print time 
+toc
+
+
+tic
+fprintf(['     > saving video - output_uMasks_all - ']);
+    writerObj = VideoWriter(['test_03_uMask.mp4'], 'MPEG-4');
+    open(writerObj);
+    writeVideo(writerObj,tmp_output_uMasks_all)
+    close(writerObj);
+% print time
+toc
+
+%% output_denseCorr_all
+tic
+fprintf(['     ---- \n'])
+fprintf(['     > reformatting data - output_denseCorr_all, output_denseCorr_masked_all, output_denseCorr_multiframe_all']);
     % set up scale and translate variables used later on for dense correspondence visibility
     if data_calcDenseCorr
         % turn up coefficient to increase visualcontrast in dense
@@ -461,94 +526,30 @@ fprintf([' - reformatting data - ']);
     end
     dc_offset = double(0); % ui8_hlf; % 
     % IMG data must be of one of the following classes: double, single, uint8
-    tmp_output_C_all                    = uint8(output_C_all                            )               ;
-%     tmp_data_C_all                      = uint8(data_C_all                              )               ;
-%     tmp_data_D_all                      = uint8(data_D_all              / i16_2_ui8     )               ;
-    tmp_output_cleanPlate               = uint8(output_cleanPlate       / i16_2_ui8     )               ;
-    tmp_output_uMasks_all               = uint8(output_uMasks_all       / i16_2_ui8     )               ;
     tmp_output_denseCorr_all            = uint8(output_denseCorr_all                    )   + dc_offset ;
-    tmp_output_grid_all                 = uint8(output_grid_all                         )               ;
     tmp_output_denseCorr_masked_all     = uint8(output_denseCorr_masked_all             )   + dc_offset ;
     tmp_output_denseCorr_multiframe_all = uint8(output_denseCorr_multiframe_all         )   + dc_offset ;
-    tmp_output_digiLum_all              = uint8(output_digiLum_all                      )               ;
-    % must have a [w,h,bitDepth, frames] array for video file writing
-%     tmp_data_D_all = permute(tmp_data_D_all, [1,2,4,3]);
-    tmp_output_uMasks_all = permute(tmp_output_uMasks_all, [1,2,4,3]);
     % scale and translate dense correspondence for visibility
     tmp_output_denseCorr_all            = uint8((double(tmp_output_denseCorr_all            ) - dc_offset) * dc_scale + dc_offset);
     tmp_output_denseCorr_masked_all     = uint8((double(tmp_output_denseCorr_masked_all     ) - dc_offset) * dc_scale + dc_offset);
     tmp_output_denseCorr_multiframe_all = uint8((double(tmp_output_denseCorr_multiframe_all ) - dc_offset) * dc_scale + dc_offset);
     %clean up
-    clear dc_*
+    clear dc_*   
 % print time
 toc
 
-%%%%%%%%%%%%
-% images
-%%%%%%%%%%%%
 tic
-fprintf([' - images - ']);
-    % save out images
-%     imwrite(tmp_data_C_all(:,:,:,1)                     ,[ 'test_01_Color.png'                  ]);
-%     imwrite(tmp_data_D_all(:,:,:,1)                     ,[ 'test_02_Depth.png'                  ]);
-    imwrite(tmp_output_C_all(:,:,:,1)                   ,[ 'test_07_Color_ouput.png'            ]);
-    imwrite(tmp_output_cleanPlate                       ,[ 'test_02_Depth_cPlate.png'           ]);
-    imwrite(tmp_output_uMasks_all(:,:,:,1)              ,[ 'test_03_uMask.png'                  ]);
+fprintf(['     > saving images - ']);
+
     imwrite(tmp_output_denseCorr_all(:,:,:,1)           ,[ 'test_04_denseCorr.png'              ]);
-    imwrite(tmp_output_grid_all(:,:,:,1)                ,[ 'test_05_grid_warped.png'            ]);
     imwrite(tmp_output_denseCorr_masked_all(:,:,:,1)    ,[ 'test_06_denseCorr_masked.png'       ]);
     imwrite(tmp_output_denseCorr_multiframe_all(:,:,:,1),[ 'test_06_denseCorr_multiframe.png'   ]);
-    imwrite(tmp_output_digiLum_all(:,:,:,1)             ,[ 'test_06_digiLum.png'                ]);
-% print time 
-toc
 
-%%%%%%%%%%%%
-% videos
-%%%%%%%%%%%%
-
-% output_C_all
-tic
-fprintf([' - videos - output_C_all - ']);
-    writerObj = VideoWriter(['test_07_Color_ouput.mp4'], 'MPEG-4');
-    open(writerObj);
-    writeVideo(writerObj,tmp_output_C_all)
-    close(writerObj);
 % print time
 toc
 
-% % data_C_all
-% tic
-% fprintf([' - videos - data_C_all - ']);
-%     writerObj = VideoWriter(['test_01_Color.mp4'], 'MPEG-4');
-%     open(writerObj);
-%     writeVideo(writerObj,tmp_data_C_all)
-%     close(writerObj);
-% % print time
-% toc
-% 
-% % data_D_all
-% tic
-% fprintf([' - videos - data_D_all - ']);
-%     writerObj = VideoWriter(['test_02_Depth.mp4'], 'MPEG-4');
-%     open(writerObj);
-%     writeVideo(writerObj,tmp_data_D_all)
-%     close(writerObj);
-% % print time
-% toc
-
-% output_uMasks_all
 tic
-fprintf([' - videos - output_uMasks_all - ']);
-    writerObj = VideoWriter(['test_03_uMask.mp4'], 'MPEG-4');
-    open(writerObj);
-    writeVideo(writerObj,tmp_output_uMasks_all)
-    close(writerObj);
-% print time
-toc
-
-% output_denseCorr_all
-tic
-fprintf([' - videos - output_denseCorr_all - ']);
+fprintf(['     > saving video - output_denseCorr_all - ']);
     writerObj = VideoWriter(['test_04_denseCorr.mp4'], 'MPEG-4');
     open(writerObj);
     writeVideo(writerObj,tmp_output_denseCorr_all)
@@ -556,19 +557,9 @@ fprintf([' - videos - output_denseCorr_all - ']);
 % print time
 toc
 
-% output_grid_all
-tic
-fprintf([' - videos - output_grid_all - ']);
-    writerObj = VideoWriter(['test_05_grid_warped.mp4'], 'MPEG-4');
-    open(writerObj);
-    writeVideo(writerObj,tmp_output_grid_all)
-    close(writerObj);
-% print time
-toc
-
 % output_denseCorr_masked_all
 tic
-fprintf([' - videos - output_denseCorr_masked_all - ']);
+fprintf(['     > saving video - output_denseCorr_masked_all - ']);
     writerObj = VideoWriter(['test_06_denseCorr_masked.mp4'], 'MPEG-4');
     open(writerObj);
     writeVideo(writerObj,tmp_output_denseCorr_masked_all)
@@ -578,7 +569,7 @@ toc
 
 % output_denseCorr_multiframe_all
 tic
-fprintf([' - videos - output_denseCorr_multiframe_all - ']);
+fprintf(['     > saving video - output_denseCorr_multiframe_all - ']);
     writerObj = VideoWriter(['test_06_denseCorr_multiframe.mp4'], 'MPEG-4');
     open(writerObj);
     writeVideo(writerObj,tmp_output_denseCorr_multiframe_all)
@@ -586,9 +577,45 @@ fprintf([' - videos - output_denseCorr_multiframe_all - ']);
 % print time
 toc
 
-% output_digiLum_all
+%% output_grid_all
 tic
-fprintf([' - videos - output_digiLum_all - ']);
+fprintf(['     ---- \n'])
+fprintf(['     > reformatting data - output_grid_all']);
+    tmp_output_grid_all = uint8(output_grid_all );
+% print time
+toc
+
+tic
+fprintf(['     > saving image - ']);
+    imwrite(tmp_output_grid_all(:,:,:,1), [ 'test_05_grid_warped.png' ]);
+% print time 
+toc
+
+tic
+fprintf(['     > saving video - output_grid_all - ']);
+    writerObj = VideoWriter(['test_05_grid_warped.mp4'], 'MPEG-4');
+    open(writerObj);
+    writeVideo(writerObj,tmp_output_grid_all)
+    close(writerObj);
+% print time
+toc
+
+%% output_digiLum_all
+tic
+fprintf(['     ---- \n'])
+fprintf(['     > reformatting data - output_digiLum_all']);
+    tmp_output_digiLum_all = uint8(output_digiLum_all );
+% print time
+toc
+
+tic
+fprintf(['     > saving image - ']);
+    imwrite(tmp_output_digiLum_all(:,:,:,1), [ 'test_06_digiLum.png' ]);
+% print time 
+toc
+
+tic
+fprintf(['     > saving video - output_digiLum_all - ']);
     writerObj = VideoWriter(['test_06_digiLum.mp4'], 'MPEG-4');
     open(writerObj);
     writeVideo(writerObj,tmp_output_digiLum_all)
@@ -596,7 +623,46 @@ fprintf([' - videos - output_digiLum_all - ']);
 % print time
 toc
 
-% clean up memory
+%% data_C_all, data_D_all
+
+tic
+fprintf(['     ---- \n'])
+fprintf(['     > reformatting data - data_C_all, data_D_all']);
+    tmp_data_C_all = uint8(data_C_all );
+    tmp_data_D_all = uint8(data_D_all / i16_2_ui8 );
+    % must have a [w,h,bitDepth, frames] array for video file writing
+    tmp_data_D_all = permute(tmp_data_D_all, [1,2,4,3]);
+% print time
+toc
+tic
+fprintf(['     > saving images - ']);
+    % save out images
+    imwrite(tmp_data_C_all(:,:,:,1), [ 'test_01_Color.png' ]);
+    imwrite(tmp_data_D_all(:,:,:,1), [ 'test_02_Depth.png' ]);
+% print time
+toc
+
+% data_C_all
+tic
+fprintf(['     > saving video - data_C_all - ']);
+    writerObj = VideoWriter(['test_01_Color.mp4'], 'MPEG-4');
+    open(writerObj);
+    writeVideo(writerObj,tmp_data_C_all)
+    close(writerObj);
+% print time
+toc
+
+% data_D_all
+tic
+fprintf(['     > saving video - data_D_all - ']);
+    writerObj = VideoWriter(['test_02_Depth.mp4'], 'MPEG-4');
+    open(writerObj);
+    writeVideo(writerObj,tmp_data_D_all)
+    close(writerObj);
+% print time
+toc
+
+%% clean up memory
 clear writerObj tmp_*
 
 
