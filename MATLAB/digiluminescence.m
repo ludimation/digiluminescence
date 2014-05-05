@@ -391,6 +391,8 @@ for i_frame = 1:n_frames
     toc
 end
 
+%% apply digilum effect to C_all
+output_C_all = data_C_all + output_digiLum_all;
 
 % clean up
 clear iteration*
@@ -417,6 +419,7 @@ fprintf([' - reformatting data - ']);
     end
     dc_offset = double(0); % ui8_hlf; % 
     % IMG data must be of one of the following classes: double, single, uint8
+    tmp_output_C_all                    = uint8(output_C_all                            )               ;
 %     tmp_data_C_all                      = uint8(data_C_all                              )               ;
 %     tmp_data_D_all                      = uint8(data_D_all              / i16_2_ui8     )               ;
     tmp_output_cleanPlate               = uint8(output_cleanPlate       / i16_2_ui8     )               ;
@@ -446,6 +449,7 @@ fprintf([' - images - ']);
     % save out images
 %     imwrite(tmp_data_C_all(:,:,:,1)                     ,[ 'test_01_Color.png'                  ]);
 %     imwrite(tmp_data_D_all(:,:,:,1)                     ,[ 'test_02_Depth.png'                  ]);
+    imwrite(tmp_output_C_all(:,:,:,1)                   ,[ 'test_07_Color_ouput.png'            ]);
     imwrite(tmp_output_cleanPlate                       ,[ 'test_02_Depth_cPlate.png'           ]);
     imwrite(tmp_output_uMasks_all(:,:,:,1)              ,[ 'test_03_uMask.png'                  ]);
     imwrite(tmp_output_denseCorr_all(:,:,:,1)           ,[ 'test_04_denseCorr.png'              ]);
@@ -459,6 +463,16 @@ toc
 %%%%%%%%%%%%
 % videos
 %%%%%%%%%%%%
+
+% output_C_all
+tic
+fprintf([' - videos - output_C_all - ']);
+    writerObj = VideoWriter(['test_07_Color_ouput.mp4'], 'MPEG-4');
+    open(writerObj);
+    writeVideo(writerObj,tmp_output_C_all)
+    close(writerObj);
+% print time
+toc
 
 % % data_C_all
 % tic
