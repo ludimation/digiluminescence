@@ -285,15 +285,30 @@ output_denseCorr_masked_all = int16( ...
 
 % create multiframe field from faded, circshifted versions of masked denseCorr
 output_denseCorr_multiframe_all = zeros(    size(output_denseCorr_all)          , 'int16'   );
-iteration_max = min(16, n_frames);
-for iteration = 1:iteration_max
+i_tmp_max = min(16, n_frames);
+for i_tmp = i_tmp_max:-1:1
+    tmp_inds = repmat(permute(output_uMasks_all, [1,2,4,3]), [1,1,3,1]) > 2^4;
+    
     % circshift iteration-1 so it starts with current frame
-    output_denseCorr_multiframe_all = output_denseCorr_multiframe_all ...
-        + circshift(output_denseCorr_masked_all, [1,1,1,iteration - 1] ) ...
-        * ((-((iteration-1)/iteration_max)+1)^(1/2)) ... y = sqrt(-x+1) easing
-        /iteration_max ... scaled based on maximum number of iterations
+    output_denseCorr_multiframe_all(tmp_inds) = ...
+        circshift(output_denseCorr_masked_all(tmp_inds), [1,1,1,i_tmp - 1] ) ...
+        * ((-((i_tmp-1)/i_tmp_max)+1)^(1/2)) ... y = sqrt(-x+1) easing
+        .../iteration_max ... scaled based on maximum number of iterations
         ;
 end
+% for i_tmp = 1:i_tmp_max
+%     % circshift iteration-1 so it starts with current frame
+%     output_denseCorr_multiframe_all = output_denseCorr_multiframe_all ...
+%         + circshift(output_denseCorr_masked_all, [1,1,1,i_tmp - 1] ) ...
+%         * ((-((i_tmp-1)/i_tmp_max)+1)^(1/2)) ... y = sqrt(-x+1) easing
+%         /i_tmp_max ... scaled based on maximum number of iterations
+%         ;
+% end
+
+imshow(uint8(output_denseCorr_multiframe_all(:,:,:,1)));
+
+% clean up
+clear i_* tmp_*
 
 % print time
 toc
@@ -311,13 +326,13 @@ for i_frame = 1:n_frames
 
     % grab x, y, and u, v for each frame
     tmp_img_source = output_denseCorr_multiframe_all(:,:,:,i_frame);
-    [p1_x, p1_y] = meshgrid(1:size(tmp_img_source,1), 1:size(tmp_img_source, 2));
-    p1_x = double(reshape(p1_x, [numel(p1_x), 1]));
-    p1_y = double(reshape(p1_y, size(p1_x)));
-    p_dx = double(reshape(tmp_img_source(:,:, 1)', size(p1_x)));
-    p_dy = double(reshape(tmp_img_source(:,:, 2)', size(p1_x)));
-    p2_x = p1_x + p_dx;
-    p2_y = p1_y + p_dy;
+    [tmp_p1_x, tmp_p1_y] = meshgrid(1:size(tmp_img_source,1), 1:size(tmp_img_source, 2));
+    tmp_p1_x = double(reshape(tmp_p1_x, [numel(tmp_p1_x), 1]));
+    tmp_p1_y = double(reshape(tmp_p1_y, size(tmp_p1_x)));
+    tmp_p_dx = double(reshape(tmp_img_source(:,:, 2)', size(tmp_p1_x))) * 2^2;
+    tmp_p_dy = double(reshape(tmp_img_source(:,:, 1)', size(tmp_p1_x))) * 2^2;
+    tmp_p2_x = tmp_p1_x + tmp_p_dx;
+    tmp_p2_y = tmp_p1_y + tmp_p_dy;
     
 %     p1_x = [120, 240, 360]'
 %     p1_y = [160, 320, 480]'
@@ -327,7 +342,7 @@ for i_frame = 1:n_frames
 %     p2_y = p1_y + p_dy;
 
     % create logical array of lines whose magnitude is very small
-    lines_to_skip = double(p_dx.^2 + p_dy.^2).^(1/2) < 4;
+    tmp_lines_to_skip = double(tmp_p_dx.^2 + tmp_p_dy.^2).^(1/2) < 2^4;
     
     % capture instance of the image to be drawn into
     tmp_img_target = output_digiLum_all(:,:,:,i_frame);
@@ -335,39 +350,39 @@ for i_frame = 1:n_frames
 %     % debug
 %     imshow(tmp_img_target)
     
-    for i_line = 1:numel(p1_x)
-        if lines_to_skip(i_line)
+    for i_line = 1:numel(tmp_p1_x)
+        if tmp_lines_to_skip(i_line)
             continue
         end
-        fprintf(['l ' num2str(i_line) ' of ' num2str(numel(p1_x)) ' - ']);
+        fprintf(['l ' num2str(i_line) ' of ' num2str(numel(tmp_p1_x)) ' - ']);
         
         %// Draw lines from p1 to p2 on matrix tmp_ing_target
         % x = p1(1):p2(1)
-        line_x =    min(p1_x(i_line), p2_x(i_line))...
+        tmp_line_x =    min(tmp_p1_x(i_line), tmp_p2_x(i_line))...
                     : ...
-                    max(p1_x(i_line), p2_x(i_line));
-        line_x = reshape(line_x, [numel(line_x), 1]);
+                    max(tmp_p1_x(i_line), tmp_p2_x(i_line));
+        tmp_line_x = reshape(tmp_line_x, [numel(tmp_line_x), 1]);
 
         % round((x - p1(1)) * p_dy / p_dx + p1(2));
-        line_y = round(...
-                              (line_x - p1_x(i_line)) ...
-                            * p_dy(i_line) ...
-                            / p_dx(i_line) ...
-                            + p1_y(i_line) ...
+        tmp_line_y = round(...
+                              (tmp_line_x - tmp_p1_x(i_line)) ...
+                            * tmp_p_dy(i_line) ...
+                            / tmp_p_dx(i_line) ...
+                            + tmp_p1_y(i_line) ...
                     ); ...
                   
-        tmp_line_xxx = repmat(line_x, [3, 1]);
-        tmp_line_yyy = repmat(line_y, [3, 1]);
+        tmp_line_xxx = repmat(tmp_line_x, [3, 1]);
+        tmp_line_yyy = repmat(tmp_line_y, [3, 1]);
         tmp_chan = reshape(...
                             repmat(...
                                 [1,2,3], ...
-                                [numel(line_x), 1]), ...
+                                [numel(tmp_line_x), 1]), ...
                             size(tmp_line_xxx) ...
                         );
         tmp_rgb = reshape(...
                             repmat(...
                                     [0, round(ui8_hlf/2), ui8_max], ... TODO: make this color user-settable
-                                    size(line_x) ...
+                                    size(tmp_line_x) ...
                                 ), ...
                             size(tmp_line_xxx)...
                         ) ;
@@ -384,8 +399,8 @@ for i_frame = 1:n_frames
         
         % draw color into the indexes
         % m(sub2ind(size(m), y, x, channel)) = 1;
-        inds = sub2ind(size(tmp_img_target), tmp_line_xxx, tmp_line_yyy, tmp_chan);
-        tmp_img_target(inds) = tmp_rgb;
+        tmp_inds = sub2ind(size(tmp_img_target), tmp_line_xxx, tmp_line_yyy, tmp_chan);
+        tmp_img_target(tmp_inds) = tmp_rgb;
     end
     
     % Draw lines along vectors of the field into the digiluminescence
@@ -400,11 +415,11 @@ for i_frame = 1:n_frames
     toc
 end
 
-%% apply digilum effect to C_all
+% apply digilum effect to C_all
 output_C_all = data_C_all + output_digiLum_all;
 
 % clean up
-clear iteration*
+clear i_* tmp_*
 
 % print time
 toc
