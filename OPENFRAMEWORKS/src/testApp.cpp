@@ -96,14 +96,13 @@ public:
 //--------------------------------------------------------------
 void testApp::setup() {
     
- 
     ofSetLogLevel(OF_LOG_VERBOSE);
     
     // TODO:
     //  - get bones showing up for player
     //      - Might need to turn the recorder off in order for the user generator of the player to work (think there can only be one instance of the user  generator)
-    //  - capture image and depth data, and save them to videos
     //  - capture bone data and save it out to a CSV that can be loaded in MATLAB
+    //  - capture image and depth data, and save them to videos
     
     openNIRecorder.setup();
     openNIRecorder.addDepthGenerator();
