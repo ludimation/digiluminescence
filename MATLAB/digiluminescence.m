@@ -33,9 +33,10 @@ function [ ...
 %       - save out from openframeworks
 %       - load into MATLAB
 %       - re-run effect rendering on new data
-%   - add points that remain still at the corners
 %   - composite video to display at end of semester show
 %       - compose audio track
+%   - add points that remain still at the corners
+%	- recalculate dense correspondence and re-render effect
 %   - post / burn to CD
 %   - complete final write-up
 %   - update write up with images from vivian's data?
