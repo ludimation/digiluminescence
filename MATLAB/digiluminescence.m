@@ -75,8 +75,10 @@ ui8_hlf = double(round(intmax('uint8')/2));
 i16_max = double(intmax('int16'));
 i16_2_ui8 = double(2^7);
 
-n_joints            = size(     data_joint_positions_all         , 1         );
-n_frames            = length(   data_timestamps                              );
+[ n_width, n_height, ...
+  n_chans, n_frames ]   = size(     data_C_all                      );
+n_joints                = size(     data_joint_positions_all    , 1 );
+% n_frames                = length(   data_timestamps                 );
 
 % print time
 toc
@@ -104,26 +106,55 @@ fprintf('----\n');
 fprintf('Creating clean plate for depth data \n');
 
 % out_D_cPlate : an image that represents the background of the scene,
-%   which is essentially the maximum depth values found in all frames of
-%   the depth data
-% To write a new cleanplate:
+%   which is essentially something that approximates the maximum depth
+%   values found in all frames of the depth data... while sticking close to
+%   the median and mean to minimize noise when calculating user masks later
+%
+% To write a new cleanplates:
 %   1) trash the clean plate image "test_02_Depth_cPlate_all.png" and,
-%   2) run this section and it will calculate a new one and save it out in
-%       the project path
+%   2) run this section  by itself, and it will calculate a new one and
+%       save it out in the project path
 
-if (exist('test_02_Depth_cPlate_all.png', 'file') == 2)
+if (...
+        exist('test_02_Depth_cPlate_all.png'    , 'file') == 2 ...
+    &&  exist('test_02_Depth_cPlate_max.png'    , 'file') == 2 ...
+    &&  exist('test_02_Depth_cPlate_mean.png'   , 'file') == 2 ...
+    &&  exist('test_02_Depth_cPlate_median.png' , 'file') == 2 ...
+    )
     % load it
     output_cleanPlate = int16(imread('test_02_Depth_cPlate_all.png')) * i16_2_ui8;
-else
-    % create a new one
-    output_cleanPlate = max(data_D_all,[],3);
-    % and save it out
-    tmp_output_cleanPlate = uint8(output_cleanPlate / i16_2_ui8 );
-    imwrite(tmp_output_cleanPlate, 'test_02_Depth_cPlate_all.png');
+else % create a new one
+    % calculate max, mean, and median
+    tic; fprintf(' - tmp_output_cleanPlate_max ');
+        tmp_output_cleanPlate_max = max(data_D_all,[],3); % fast (close second)
+    toc    
+    tic; fprintf(' - tmp_output_cleanPlate_mean ');
+        tmp_output_cleanPlate_mean = mean(data_D_all,3); % fastest
+    toc    
+    tic; fprintf(' - tmp_output_cleanPlate_median ');
+        tmp_output_cleanPlate_median = median(data_D_all,3); % much slower
+    toc
+    % use their average (mean) for the mask to mimize noise in the user
+    % mask calcs later on
+    tmp_output_cleanPlate_all = int16([...
+                                tmp_output_cleanPlate_max   , ...
+                                tmp_output_cleanPlate_mean  , ...
+                                tmp_output_cleanPlate_median  ...
+                            ]);
+    tmp_output_cleanPlate_all = reshape(tmp_output_cleanPlate_all, [n_width, n_height, 3]);
+    output_cleanPlate = mean(tmp_output_cleanPlate_all, 3);
+    %     output_cleanPlate = tmp_output_cleanPlate_max   ;
+    %     output_cleanPlate = tmp_output_cleanPlate_mean  ;
+    %     output_cleanPlate = tmp_output_cleanPlate_median;
+    % save out all files for comparison
+    imwrite( uint8( output_cleanPlate               / i16_2_ui8 ), 'test_02_Depth_cPlate_all.png'    );
+    imwrite( uint8( tmp_output_cleanPlate_max       / i16_2_ui8 ), 'test_02_Depth_cPlate_max.png'    );
+    imwrite( uint8( tmp_output_cleanPlate_mean      / i16_2_ui8 ), 'test_02_Depth_cPlate_mean.png'   );
+    imwrite( uint8( tmp_output_cleanPlate_median    / i16_2_ui8 ), 'test_02_Depth_cPlate_median.png' );
 end
 
 % clean up
-clear tmp_output_cleanPlate
+clear tmp_*
 
 % print time
 toc
