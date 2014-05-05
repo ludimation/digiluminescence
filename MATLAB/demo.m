@@ -38,10 +38,14 @@ data_mask_thresh = 256
 data_calcDenseCorr = false;
 data_calcDenseCorr = true %comment this line out to skip dense correspondence caculcations
 data_n_framesToProcess = 31:32; % 2 frames = smallest test size
-% data_n_framesToProcess = 31:35; % 5 frames
+data_n_framesToProcess = 31:35; % 5 frames
+data_n_framesToProcess = 31:40; % 10 frames
 % data_n_framesToProcess = 31:80; % 50 frames
 % data_n_framesToProcess = 1:300;
 % data_n_framesToProcess = 1:length(data_timestamps); % Uncomment this line for full data processing, comment it out for smaller set above
+
+data_n_framesToProcess_size = size(data_n_framesToProcess)
+clear data_n_framesToProcess_size
 
 % print time
 toc
