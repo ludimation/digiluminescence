@@ -703,16 +703,16 @@ tic
 fprintf(['     ---- \n'])
 fprintf(['     > reformatting data - data_C_all, data_D_all']);
     tmp_data_C_all = uint8(data_C_all );
-    tmp_output_D_all = uint8(data_D_all / i16_2_ui8 );
+    tmp_data_D_all = uint8(data_D_all / i16_2_ui8 );
     % must have a [w,h,bitDepth, frames] array for video file writing
-    tmp_output_D_all = permute(tmp_output_D_all, [1,2,4,3]);
+    tmp_data_D_all = permute(tmp_data_D_all, [1,2,4,3]);
 % print time
 toc
 tic
 fprintf(['     > saving images - ']);
     % save out images
     imwrite(tmp_data_C_all(:,:,:,1), [ 'test_01_Color_data.png' ]);
-    imwrite(tmp_output_D_all(:,:,:,1), [ 'test_02_Depth_data.png' ]);
+    imwrite(tmp_data_D_all(:,:,:,1), [ 'test_02_Depth_data.png' ]);
 % print time
 toc
 
@@ -731,7 +731,7 @@ tic
 fprintf(['     > saving video - data_D_all - ']);
     writerObj = VideoWriter(['test_02_Depth_data.mp4'], 'MPEG-4');
     open(writerObj);
-    writeVideo(writerObj,tmp_output_D_all)
+    writeVideo(writerObj,tmp_data_D_all)
     close(writerObj);
 % print time
 toc
