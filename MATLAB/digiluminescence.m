@@ -35,6 +35,7 @@ function [ ...
 %       - re-run effect rendering on new data
 %   - composite video to display at end of semester show
 %       - compose audio track
+%   - figure out what’s going on with directions of u + v vectors
 %   - add points that remain still at the corners
 %	- recalculate dense correspondence and re-render effect
 %   - post / burn to CD
