@@ -290,10 +290,7 @@ output_j_features = [ j_endingFeatures; j_startingFeatures];
 %    doesn't warp around so much
 
 % cleanup
-clear j_pos_all_reshaped j_pos_all_reshaped_projective
-clear j_pos_all_x j_pos_all_y j_pos_all_z
-clear j_pos_all_x_prjctd j_pos_all_y_prjctd j_pos_all_z_prjctd 
-clear j_pos_all_projective j_pos_all_projective_start 
+clear j_* 
 
 % print time
 toc
