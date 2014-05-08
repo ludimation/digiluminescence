@@ -9,7 +9,7 @@ public:
 
 //-- functions and properties which might be useful for recording skeletal data
 //////////////////////
-//ofxOpenNITypes.cpp
+// ofxOpenNITypes.cpp
 //////////////////////
 //    void ofxOpenNIUser::drawSkeleton() {
 //        ofPushStyle();
@@ -32,7 +32,7 @@ public:
 //    }
 //
 //////////////////////
-//ofxOpenNI.cpp
+// ofxOpenNI.cpp
 //////////////////////
 //    ofPixels& ofxOpenNI::getDepthPixels();
 //    ofPixels& ofxOpenNI::getImagePixels();
@@ -44,8 +44,9 @@ public:
 //    ofTranslate(getWidth(), 0.0f);
 //    if(g_bIsImageOn || g_bIsInfraOn) drawImage();
 // 	currentTrackedUsers[currentTrackedUserIDs[nID]].drawSkeleton();
+//
 //////////////////////
-//ofxOpenNI.h
+// ofxOpenNI.h
 //////////////////////
 //    bool setSkeletonProfile(XnSkeletonProfile profile);
 //    XnSkeletonProfile getSkeletonProfile();
@@ -55,8 +56,9 @@ public:
 //    xn::DepthMetaData& getDepthMetaData();
 //    xn::ImageMetaData& getImageMetaData();
 //    ofEvent<ofxOpenNIUserEvent> userEvent;
+//
 //////////////////////
-//ofxOpenNiUtils.h
+// ofxOpenNiUtils.h
 //////////////////////
 //    enum Joint
 //    enum Limb
@@ -69,8 +71,9 @@ public:
 //    inline string getLimbAsString(Limb type)
 //    inline string getUserStatusAsString(UserStatusType type)
 //    inline string getCalibrationStatusAsString(XnCalibrationStatus type)
+//
 //////////////////////
-//ofxOpenNiTypes.h
+// ofxOpenNiTypes.h
 //////////////////////
 // class ofxOpenNIJoint
 //      ofPoint & getProjectivePosition()
@@ -91,7 +94,33 @@ public:
 //        ofPopStyle();
 //    }
 // inline int numJointsInside(ofxOpenNIUser & user)
-// 
+//
+////////////////////////
+// ofUtils -- 
+////////////////////////
+// ofGetDay()
+// ofGetFrameNum()
+// ofGetHours()
+// ofGetMinutes()
+// ofGetMonth()
+// ofGetSeconds()
+// ofGetSystemTimeMicros()
+// ofGetYear()
+// ofToString() // "the number is " + ofToString(10)
+//////////////
+// ofLog -- http://www.openframeworks.cc/documentation/utils/ofLog.html
+//////////////
+//class methods
+//    ofLog()
+//    setAutoSpace()
+//    setChannel()
+//global functions
+//    ofGetLogLevel()
+//    ofGetLogLevelName()
+//    ofLogToConsole()
+//    ofLogToFile()
+//    ofSetLogLevel()
+//    ofSetLoggerChannel()
 
 //--------------------------------------------------------------
 void testApp::setup() {
