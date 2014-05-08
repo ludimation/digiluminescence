@@ -21,7 +21,7 @@ public:
 	void mouseReleased(int x, int y, int button);
 	void windowResized(int w, int h);
 
-	ofxOpenNI openNIRecorder;
+//	ofxOpenNI openNIRecorder;
     ofxOpenNI openNIPlayer;
     
     ofTrueTypeFont verdana;
