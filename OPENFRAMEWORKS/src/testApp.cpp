@@ -133,16 +133,18 @@ void testApp::setup() {
     //  - capture bone data and save it out to a CSV that can be loaded in MATLAB
     //  - capture image and depth data, and save them to videos
     
-    openNIRecorder.setup();
-    openNIRecorder.addDepthGenerator();
-    openNIRecorder.addImageGenerator();
-    openNIRecorder.setRegister(true);
-    openNIRecorder.setMirror(true);
-    openNIRecorder.addUserGenerator();
-    openNIRecorder.setMaxNumUsers(2);
-    openNIRecorder.start();
+//    openNIRecorder.setup();
+//    openNIRecorder.addDepthGenerator();
+//    openNIRecorder.addImageGenerator();
+//    openNIRecorder.setRegister(true);
+//    openNIRecorder.setMirror(true);
+//    openNIRecorder.addUserGenerator();
+//    openNIRecorder.setMaxNumUsers(2);
+//    openNIRecorder.start();
 
     openNIPlayer.setup();
+    openNIPlayer.addDepthGenerator();
+    openNIPlayer.addImageGenerator();
     openNIPlayer.setRegister(true);
     openNIPlayer.setMirror(true);
     openNIPlayer.addUserGenerator();
@@ -154,7 +156,7 @@ void testApp::setup() {
 
 //--------------------------------------------------------------
 void testApp::update(){
-    openNIRecorder.update();
+//    openNIRecorder.update();
     openNIPlayer.update();
 }
 
@@ -164,8 +166,14 @@ void testApp::draw(){
     
     ofPushMatrix();
     
-    openNIRecorder.drawDebug(0, 0);
+//    openNIRecorder.drawDebug(0, 0);
     openNIPlayer.drawDebug(0, 240);
+    openNIPlayer.drawSkeletons(0, 240);
+
+//    ofxOpenNIUser::drawSkeleton();
+//    ofxOpenNI::drawSkeletons();
+//    ofxOpenNI::getUserGenerator()
+
 
     ofPushMatrix();
     
@@ -186,7 +194,7 @@ void testApp::gestureEvent(ofxOpenNIGestureEvent & event){
 
 //--------------------------------------------------------------
 void testApp::exit(){
-    openNIRecorder.stop();
+//    openNIRecorder.stop();
     openNIPlayer.stop();
 }
 
@@ -197,12 +205,12 @@ void testApp::keyPressed(int key){
     string fileName = "test_20140501_1904.oni";
     switch (key) {
         case ' ':
-            if(!openNIRecorder.isRecording()){
-//                openNIRecorder.startRecording(ofToDataPath("test"+ std::to_string(ofGetSystemTimeMicros()/1000)+".oni"));
-                openNIRecorder.startRecording(ofToDataPath(fileName));
-            }else{
-                openNIRecorder.stopRecording();
-            }
+//            if(!openNIRecorder.isRecording()){
+////                openNIRecorder.startRecording(ofToDataPath("test"+ std::to_string(ofGetSystemTimeMicros()/1000)+".oni"));
+//                openNIRecorder.startRecording(ofToDataPath(fileName));
+//            }else{
+//                openNIRecorder.stopRecording();
+//            }
             break;
         case 'p':
             openNIPlayer.startPlayer(fileName);
@@ -222,11 +230,11 @@ void testApp::keyPressed(int key){
             openNIPlayer.nextFrame();
             break;
         case 'x':
-            openNIRecorder.stop();
+//            openNIRecorder.stop();
             openNIPlayer.stop();
             break;
         case 't':
-            openNIRecorder.toggleRegister();
+//            openNIRecorder.toggleRegister();
             break;
     }
 
